@@ -1,0 +1,6 @@
+# deploy web site
+> webStage
+$exists /target/web/stage/main.js
+$exists /target/web/stage/index.js
+$exists /target/web/stage/test/test1.js
+$exists /target/web/stage/test/test2.js

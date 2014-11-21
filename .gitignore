@@ -1,0 +1,9 @@
+# target folders
+target
+project/project
+_scripted.sbt
+.history
+.idea*
+# NodeJS
+node_modules
+package.json
