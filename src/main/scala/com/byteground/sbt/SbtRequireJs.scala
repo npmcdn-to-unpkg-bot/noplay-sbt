@@ -34,60 +34,33 @@ object SbtRequireJs
     }
 
     case class RequireJsPackage(name: String, main: String) {
-      lazy val toMap: Map[String, Any] = Map(
-        "name" -> name,
-        "main" -> main
-      )
+      private[SbtRequireJs] lazy val toMap: Map[String, Any] =
+        Map(
+          "name" -> name,
+          "main" -> main
+        )
     }
 
     object RequireJsConfiguration {
-      type Paths = Map[RequireJsModule.Id, RequireJsModule.Path]
-
-      object Paths {
-        def empty: Paths = Map.empty[RequireJsModule.Id, RequireJsModule.Path]
-      }
-
-      type Bundles = Map[RequireJsModule.Id, Seq[RequireJsModule.Path]]
-
-      object Bundles {
-        def empty: Bundles = Map.empty[RequireJsModule.Id, Seq[RequireJsModule.Path]]
-      }
-
-      type Shim = Map[String, Shim.Config]
-
+      type Paths = Seq[(RequireJsModule.Id, RequireJsModule.Path)]
+      type Bundles = Seq[(RequireJsModule.Id, Seq[RequireJsModule.Path])]
+      type Shim = Seq[(String, Shim.Config)]
       object Shim {
-        def empty: Shim = Map.empty[String, Shim.Config]
-
         case class Config(deps: Seq[RequireJsModule.Id] = Nil,
                           exports: Option[String] = None,
                           init: Option[Javascript.Function] = None) {
-          lazy val toMap: Map[String, Any] = Map(
-            "deps" -> deps,
-            "exports" -> exports,
-            "init" -> init
-          )
+          private[SbtRequireJs] lazy val toMap: Map[String, Any] =
+            Map(
+              "deps" -> deps,
+              "exports" -> exports,
+              "init" -> init
+            )
         }
 
       }
-
-      type _Map = Map[String, Map[RequireJsModule.Id, RequireJsModule.Id]]
-
-      object _Map {
-        def empty: _Map = Map.empty[String, Map[RequireJsModule.Id, RequireJsModule.Id]]
-      }
-
-      type Packages = Map[RequireJsModule.Id, RequireJsPackage]
-
-      object Packages {
-        def empty: Packages = Map.empty[RequireJsModule.Id, RequireJsPackage]
-      }
-
-      type Config = Map[RequireJsModule.Id, Map[String, Any]]
-
-      object Config {
-        def empty: Config = Map.empty[RequireJsModule.Id, Map[String, Any]]
-      }
-
+      type _Map = Seq[(String, Map[RequireJsModule.Id, RequireJsModule.Id])]
+      type Packages = Seq[(RequireJsModule.Id, RequireJsPackage)]
+      type Config = Seq[(RequireJsModule.Id, Map[String, Any])]
     }
 
     case class RequireJsConfiguration(baseUrl: Option[String],
@@ -107,15 +80,15 @@ object SbtRequireJs
                                       urlArgs: Option[String],
                                       scriptType: String,
                                       skipDataMain: Boolean) {
-      def toMap: Map[String, _] =
+      private[SbtRequireJs] def toMap(implicit logger: Logger): Map[String, _] =
         Map(
           "baseUrl" -> baseUrl,
-          "paths" -> paths,
-          "bundles" -> bundles,
-          "shim" -> shim.map { case (k, v) => (k, v.toMap)},
-          "map" -> map,
-          "config" -> config,
-          "packages" -> packages.map { case (k, v) => (k, v.toMap)},
+          asMap("paths", paths),
+          asMap("bundles", bundles),
+          asMap("shim", shim.map { case (k, v) => (k, v.toMap)}),
+          asMap("map", map),
+          asMap("config", config),
+          asMap("packages", packages.map { case (k, v) => (k, v.toMap)}),
           "nodeIdCompat" -> nodeIdCompat,
           "waitSeconds" -> waitSeconds,
           "context" -> context,
@@ -127,12 +100,24 @@ object SbtRequireJs
           "scriptType" -> scriptType,
           "skipDataMain" -> skipDataMain
         )
+
+
+      private[SbtRequireJs] def asMap[K, V](key: String, seq: Seq[(K, V)])(implicit logger: Logger): (String, Map[K, V]) = {
+        seq.groupBy(_._1) foreach {
+          case (groupKey, groupValues) =>
+            if (groupValues.size > 1)
+              logger.warn(s"duplicate key '$groupKey' in '$key!")
+        }
+        (key, Map(seq: _*))
+      }
     }
 
     val requireJsVersion = settingKey[String]("The web jars require js version")
     val requireJsPath = settingKey[String]("The web jars require js path")
-    val requireJsConfigurationBaseUrl = settingKey[Option[String]]("The root path to use for all module lookups")
-    val requireJsConfigurationPaths = settingKey[RequireJsConfiguration.Paths]("The path mappings for module names not found directly under baseUrl")
+    val requireJsConfigurationBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
+    val requireJsConfigurationPaths = settingKey[RequireJsConfiguration.Paths](
+      "The path mappings for module names not found directly under baseUrl"
+    )
     val requireJsConfigurationBundles = settingKey[RequireJsConfiguration.Bundles](
       "The bundles allow configuring multiple module IDs to be found in another script"
     )
@@ -218,12 +203,12 @@ object SbtRequireJs
 
     lazy val unscopedProjectSettings = Seq(
       requireJsConfigurationBaseUrl := None,
-      requireJsConfigurationPaths := RequireJsConfiguration.Paths.empty,
-      requireJsConfigurationBundles := RequireJsConfiguration.Bundles.empty,
-      requireJsConfigurationShim := RequireJsConfiguration.Shim.empty,
-      requireJsConfigurationMap := RequireJsConfiguration._Map.empty,
-      requireJsConfigurationConfig := RequireJsConfiguration.Config.empty,
-      requireJsConfigurationPackages := RequireJsConfiguration.Packages.empty,
+      requireJsConfigurationPaths := Nil,
+      requireJsConfigurationBundles := Nil,
+      requireJsConfigurationShim := Nil,
+      requireJsConfigurationMap := Nil,
+      requireJsConfigurationConfig := Nil,
+      requireJsConfigurationPackages := Nil,
       requireJsConfigurationNodeIdCompat := false,
       requireJsConfigurationWaitSeconds := 7,
       requireJsConfigurationContext := None,
@@ -260,6 +245,7 @@ object SbtRequireJs
       requireJsMainTemplateFile := None,
       requireJsMainFile := requireJsDirectory.value / requireJsMainName.value,
       requireJsMainGenerator := {
+        implicit val logger = streams.value.log
         val configuration = Javascript.toJs(requireJsConfiguration.value.toMap)
         val moduleId = requireJsMainModuleId.value
         val mainTemplate = requireJsMainTemplateFile.value.map(IO.read(_)) getOrElse {
