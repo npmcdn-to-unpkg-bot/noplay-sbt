@@ -1,11 +1,11 @@
-lazy val root = (project in file(".")).enablePlugins(SbtRequireJs, SbtWebServer, SbtWebBrowser).settings(
-  requireJsConfigurationPaths in Assets := Map(
+lazy val root = (project in file(".")).enablePlugins(SbtRequireJs).settings(
+  requireJsConfigurationPaths in Assets ++= Seq(
     "configuration" -> "configuration",
     "index" -> "index"
   ),
   requireJsConfigurationDeps in Assets += "configuration",
   requireJsMainModuleId in Assets := "index",
-  requireJsConfigurationPaths in TestAssets := Map(
+  requireJsConfigurationPaths in TestAssets ++= Seq(
     "configuration" -> "configuration",
     "index" -> "index"
   ),
