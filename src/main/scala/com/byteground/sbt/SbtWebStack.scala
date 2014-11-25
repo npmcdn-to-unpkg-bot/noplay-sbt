@@ -15,17 +15,28 @@
  */
 package com.byteground.sbt
 
+import com.typesafe.sbt.jse.SbtJsEngine
+import com.typesafe.sbt.less.SbtLess
+import com.typesafe.sbt.rjs.SbtRjs
+import com.typesafe.sbt.web.SbtWeb
 import sbt.AutoPlugin
 
 object SbtWebStack
   extends AutoPlugin {
   override lazy val requires =
-    SbtRequireJs &&
+    SbtWeb &&
+      SbtJsEngine &&
+      SbtWebIndex &&
+      SbtRequireJs &&
       SbtJquery &&
       SbtQ &&
       SbtAngularJs &&
       SbtAngularUiRouter &&
       SbtBootstrapJs &&
       SbtAngularUiBootstrap &&
-      SbtFontAwesome
+      SbtFontAwesome &&
+      SbtLess &&
+      SbtRjs &&
+      SbtWebServer &&
+      SbtWebBrowser
 }

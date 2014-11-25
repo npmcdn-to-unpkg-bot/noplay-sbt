@@ -1,0 +1,3 @@
+# generate main file
+> webStage
+$exists /target/web/stage/main.js

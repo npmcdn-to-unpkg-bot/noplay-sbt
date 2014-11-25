@@ -7,8 +7,8 @@ lazy val root = (project in file(".")).enablePlugins(SbtAngularUiBootstrap).sett
     val mainFile = (requireJsMainFile in Assets).value
     val mainFileContent = IO.read(mainFile).replace('\n', ' ').replace('\r', ' ').replace(" ", "")
     if (!mainFileContent.contains("'angular-ui-bootstrap':'lib/angular-ui-bootstrap/ui-bootstrap-tpls'"))
-      sys.error("invalid angular ui router path setting!")
+      sys.error("invalid angular ui bootstrap path setting!")
     if (!mainFileContent.contains("'angular-ui-bootstrap':{deps:['angular'],init:function(angular){returnangular.module(\"ui.bootstrap\");}}"))
-      sys.error("invalid angular ui router shim setting!")
+      sys.error("invalid angular ui bootstrap shim setting!")
   }
 )

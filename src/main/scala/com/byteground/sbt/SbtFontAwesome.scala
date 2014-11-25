@@ -23,7 +23,7 @@ import sbt._
 
 object SbtFontAwesome
   extends AutoPlugin {
-  override lazy val requires = SbtRequireJs
+  override lazy val requires = SbtRequireJs && SbtBootstrapJs
 
   object autoImport {
     val fontAwesomeVersion = settingKey[String]( "The font awesome version" )
@@ -36,7 +36,7 @@ object SbtFontAwesome
   )
 
   override lazy val projectSettings = Seq(
-    fontAwesomeVersion := "1.0.1",
+    fontAwesomeVersion := "4.2.0",
     libraryDependencies += "org.webjars" % "font-awesome" % fontAwesomeVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
