@@ -17,6 +17,7 @@ package com.byteground.sbt
 
 import com.byteground.sbt.SbtWebIndex.autoImport._
 import com.byteground.sbt.util.Javascript
+import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
 import sbt.Keys._
@@ -24,7 +25,7 @@ import sbt._
 
 object SbtRequireJs
   extends AutoPlugin {
-  override lazy val requires = SbtWebIndex
+  override lazy val requires = SbtWebIndex && SbtRjs
 
   object autoImport {
 
@@ -86,7 +87,7 @@ object SbtRequireJs
           asMap("paths", paths),
           asMap("bundles", bundles),
           asMap("shim", shim.map { case (k, v) => (k, v.toMap)}),
-          asMap("map", map),
+          asMap("map", map.groupBy(_._1).toSeq.map { case (k, v) => (k, v.unzip._2.reduce(_ ++ _)) }),
           asMap("config", config),
           asMap("packages", packages.map { case (k, v) => (k, v.toMap)}),
           "nodeIdCompat" -> nodeIdCompat,
@@ -101,7 +102,7 @@ object SbtRequireJs
           "skipDataMain" -> skipDataMain
         )
 
-
+      // (Map.empty[RequireJsModule.Id, RequireJsModule.Id] /: v.unzip._2)(_ ++ _)
       private[SbtRequireJs] def asMap[K, V](key: String, seq: Seq[(K, V)])(implicit logger: Logger): (String, Map[K, V]) = {
         seq.groupBy(_._1) foreach {
           case (groupKey, groupValues) =>
