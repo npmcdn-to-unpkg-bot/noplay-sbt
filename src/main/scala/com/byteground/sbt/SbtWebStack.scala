@@ -30,12 +30,13 @@ object SbtWebStack
       SbtRequireJs &&
       SbtJquery &&
       SbtQ &&
+      SbtLess &&
       SbtAngularJs &&
       SbtAngularUiRouter &&
       SbtBootstrapJs &&
       SbtAngularUiBootstrap &&
       SbtFontAwesome &&
-      SbtLess &&
+      SbtWebUtil &&
       SbtRjs &&
       SbtWebServer &&
       SbtWebBrowser
