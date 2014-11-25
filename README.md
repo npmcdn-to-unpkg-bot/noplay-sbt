@@ -1,2 +1,2 @@
-byteground-sbt-web-requirejs-plugins
+byteground-sbt-web-stack-plugins
 ====================================

@@ -8,6 +8,9 @@ object BuildDependencies {
   val sbtWebCoreVersion = "3.10.0"
   val sbtWebCore = "com.byteground" %% "byteground-sbt-web-core-plugins" % sbtWebCoreVersion
 
+  val sbtLessVersion = "1.0.2"
+  val sbtLess = "com.typesafe.sbt" %% "sbt-less" % sbtLessVersion
+
   val sbtRjsVersion = "1.0.6"
   val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
 }
@@ -17,7 +20,7 @@ object Build
 
   import BuildDependencies._
 
-  lazy val root = bytegroundProject("sbt-web-requirejs-plugins").settings(
+  lazy val root = bytegroundProject("sbt-web-stack-plugins").settings(
       sbtPlugin := true,
       libraryDependencies ++= Seq(
       ),
@@ -26,6 +29,7 @@ object Build
         val scalaBV = scalaBinaryVersion.value
         Seq(
           sbtPluginExtra(sbtWebCore, sbtBV, scalaBV),
+          sbtPluginExtra(sbtLess, sbtBV, scalaBV),
           sbtPluginExtra(sbtRjs, sbtBV, scalaBV)
         )
       }
