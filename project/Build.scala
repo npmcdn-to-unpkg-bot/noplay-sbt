@@ -22,8 +22,6 @@ object Build
 
   lazy val root = bytegroundProject("sbt-web-stack-plugins").settings(
       sbtPlugin := true,
-      libraryDependencies ++= Seq(
-      ),
       libraryDependencies ++= {
         val sbtBV = sbtBinaryVersion.value
         val scalaBV = scalaBinaryVersion.value

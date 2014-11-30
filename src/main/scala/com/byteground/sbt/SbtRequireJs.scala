@@ -299,7 +299,7 @@ object SbtRequireJs
   override lazy val projectSettings =
     inConfig(Assets)(unscopedProjectSettings) ++
       inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
-      requireJsVersion := "2.1.14-3",
+      requireJsVersion := "2.1.15",
       requireJsPath := webModulesLib.value + "/requirejs/require.js",
       libraryDependencies += "org.webjars" % "requirejs" % requireJsVersion.value
     )

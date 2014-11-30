@@ -37,7 +37,7 @@ object SbtAngularJs
   )
 
   override lazy val projectSettings = Seq(
-    angularJsVersion := "1.3.0",
+    angularJsVersion := "1.3.4-1",
     libraryDependencies += "org.webjars" % "angularjs" % angularJsVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
