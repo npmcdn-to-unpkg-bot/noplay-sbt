@@ -5,13 +5,13 @@ import sbt.Keys._
 import sbt._
 
 object BuildDependencies {
-  val sbtWebCoreVersion = "3.10.0"
+  val sbtWebCoreVersion = "3.12.0"
   val sbtWebCore = "com.byteground" %% "byteground-sbt-web-core-plugins" % sbtWebCoreVersion
 
-  val sbtLessVersion = "1.0.2"
+  val sbtLessVersion = "1.0.4"
   val sbtLess = "com.typesafe.sbt" %% "sbt-less" % sbtLessVersion
 
-  val sbtRjsVersion = "1.0.6"
+  val sbtRjsVersion = "1.0.7"
   val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
 }
 
