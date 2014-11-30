@@ -75,6 +75,6 @@ object SbtWebUtil
   override lazy val projectSettings = Seq(
     webUtilName := "byteground-web-util",
     webUtilVersion := "0.2.2",
-    libraryDependencies += "com.byteground" % s"${webUtilName.value}" % webUtilVersion.value
+    libraryDependencies += "com.byteground" % webUtilName.value % webUtilVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

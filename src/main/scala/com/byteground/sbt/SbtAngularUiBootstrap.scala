@@ -48,7 +48,7 @@ object SbtAngularUiBootstrap
   )
 
   override lazy val projectSettings = Seq(
-    angularUiBootstrapVersion := "0.11.2",
+    angularUiBootstrapVersion := "0.12.0",
     libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
