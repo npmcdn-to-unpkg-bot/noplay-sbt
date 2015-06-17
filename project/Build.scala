@@ -5,7 +5,7 @@ import sbt.Keys._
 import sbt._
 
 object BuildDependencies {
-  val sbtWebCoreVersion = "3.12.0"
+  val sbtWebCoreVersion = "3.14.0"
   val sbtWebCore = "com.byteground" %% "byteground-sbt-web-core-plugins" % sbtWebCoreVersion
 
   val sbtLessVersion = "1.0.4"
@@ -20,7 +20,7 @@ object Build
 
   import BuildDependencies._
 
-  lazy val root = bytegroundProject("sbt-web-stack-plugins").settings(
+  lazy val root = bytegroundProject("sbt-web-stack-plugins", isRoot = true).settings(
       sbtPlugin := true,
       libraryDependencies ++= {
         val sbtBV = sbtBinaryVersion.value
