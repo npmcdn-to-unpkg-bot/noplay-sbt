@@ -4,4 +4,4 @@ resolvers += "scm-manager releases repository" at "http://maven.scm-manager.org/
 
 resolvers += "ByTeGround Maven Public Releases Repository" at "http://maven.byteground.com/public/releases"
 
-addSbtPlugin("com.byteground" %% "byteground-sbt-community-settings" % "3.16.0")
+addSbtPlugin("com.byteground" %% "byteground-sbt-community-settings" % "3.18.0")
