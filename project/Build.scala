@@ -5,7 +5,7 @@ import sbt.Keys._
 import sbt._
 
 object BuildDependencies {
-  val sbtWebCoreVersion = "3.20.0"
+  val sbtWebCoreVersion = "3.21.0"
   val sbtWebCore = "com.byteground" %% "byteground-sbt-web-core-plugins" % sbtWebCoreVersion
 
   val sbtLessVersion = "1.0.4"
