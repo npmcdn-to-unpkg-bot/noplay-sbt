@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
@@ -24,18 +24,18 @@ import sbt._
 
 object SbtAngularUiBootstrap
   extends AutoPlugin {
-  override lazy val requires = SbtBootstrapJs && SbtAngularJs
+  override lazy val requires = SbtBootstrap && SbtAngular
 
   object autoImport {
-    val angularUiBootstrapVersion = settingKey[String]( "Angular Ui Bootstrap version" )
+    val angularUiBootstrapVersion = settingKey[String]("Angular Ui Bootstrap version")
   }
 
   import com.byteground.sbt.SbtAngularUiBootstrap.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "angular-ui-bootstrap" -> s"${webModulesLib.value}/angular-ui-bootstrap/ui-bootstrap-tpls",
-    requireJsConfigurationShim += "angular-ui-bootstrap" -> RequireJsConfiguration.Shim.Config(
-      Seq( "angular" ),
+    requireConfigurationPaths += "angular-ui-bootstrap" -> s"${webModulesLib.value}/angular-ui-bootstrap/ui-bootstrap-tpls",
+    requireConfigurationShim += "angular-ui-bootstrap" -> RequireConfiguration.Shim.Config(
+      Seq("angular"),
       init = Some(
         Javascript.Function(
           """function(angular) {
@@ -48,7 +48,7 @@ object SbtAngularUiBootstrap
   )
 
   override lazy val projectSettings = Seq(
-    angularUiBootstrapVersion := "0.12.0",
+    angularUiBootstrapVersion := "0.13.4",
     libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
+  ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }

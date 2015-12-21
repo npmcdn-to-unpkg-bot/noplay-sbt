@@ -24,11 +24,11 @@ object SbtWebStack
   extends AutoPlugin {
   override lazy val requires =
     SbtWeb &&
-      SbtRequireJs &&
+      SbtRequire &&
       SbtJquery &&
       SbtQ &&
-      SbtAngularJs &&
-      SbtBootstrapJs &&
+      SbtAngular &&
+      SbtBootstrap &&
       SbtFontAwesome &&
       SbtLess &&
       SbtRjs &&

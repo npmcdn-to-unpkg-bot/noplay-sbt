@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
@@ -23,7 +23,7 @@ import sbt._
 
 object SbtJquery
   extends AutoPlugin {
-  override lazy val requires = SbtRequireJs
+  override lazy val requires = SbtRequire
 
   object autoImport {
     val jqueryVersion = settingKey[String]( "The Jquery version" )
@@ -32,8 +32,8 @@ object SbtJquery
   import com.byteground.sbt.SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "jquery" -> s"${webModulesLib.value}/jquery/jquery",
-    requireJsConfigurationShim += "jquery" -> RequireJsConfiguration.Shim.Config( exports = Some( "jQuery" ) )
+    requireConfigurationPaths += "jquery" -> s"${webModulesLib.value}/jquery/jquery",
+    requireConfigurationShim += "jquery" -> RequireConfiguration.Shim.Config( exports = Some( "jQuery" ) )
   )
 
   override lazy val projectSettings = Seq(

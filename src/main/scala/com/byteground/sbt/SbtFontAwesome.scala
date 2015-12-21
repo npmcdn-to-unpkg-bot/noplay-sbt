@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
@@ -23,7 +23,7 @@ import sbt._
 
 object SbtFontAwesome
   extends AutoPlugin {
-  override lazy val requires = SbtRequireJs && SbtBootstrapJs
+  override lazy val requires = SbtRequire && SbtBootstrap
 
   object autoImport {
     val fontAwesomeVersion = settingKey[String]( "The font awesome version" )
@@ -32,11 +32,11 @@ object SbtFontAwesome
   import com.byteground.sbt.SbtFontAwesome.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "font-awesome" -> s"${webModulesLib.value}/font-awesome"
+    requireConfigurationPaths += "font-awesome" -> s"${webModulesLib.value}/font-awesome"
   )
 
   override lazy val projectSettings = Seq(
-    fontAwesomeVersion := "4.2.0",
+    fontAwesomeVersion := "4.5.0",
     libraryDependencies += "org.webjars" % "font-awesome" % fontAwesomeVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
