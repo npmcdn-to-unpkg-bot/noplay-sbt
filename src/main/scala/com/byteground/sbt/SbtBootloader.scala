@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,16 @@ object SbtBootloader
 
   override lazy val requires = SbtWebUtil
 
+  object autoImport {
+    val bootloaderStyle = settingKey[Style]( "Bootloader style" )
+  }
+
+  import autoImport._
+
   val unscopedProjectSettings = Seq(
+    bootloaderStyle := s"${webModulesLib.value}/${webUtilName.value}/bootloader/bootloader.css",
     webIndexEmbeddedStyles ++= Seq[Style](
-      s"${webModulesLib.value}/${webUtilName.value}/bootloader/bootloader.css"
+      bootloaderStyle.value
     ),
     webIndexEmbeddedScripts ++= Seq[Script](
       s"${webModulesLib.value}/${webUtilName.value}/bootloader/bootloader.js"

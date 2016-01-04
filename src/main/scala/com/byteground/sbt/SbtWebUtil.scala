@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
@@ -26,8 +26,8 @@ import scala.language.existentials
 object SbtWebUtil
   extends AutoPlugin {
   override lazy val requires =
-    SbtAngularJs &&
-      SbtBootstrapJs &&
+    SbtAngular &&
+      SbtBootstrap &&
       SbtQ &&
       SbtJquery
 
@@ -42,19 +42,23 @@ object SbtWebUtil
       webUtilPath(name, Some(path))
 
     private def webUtilPath(name: String, path: Option[String]): Def.Setting[_] =
-      requireJsConfigurationPaths += name -> s"${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
+      requireConfigurationPaths += name -> s"${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
   }
 
   import com.byteground.sbt.SbtWebUtil.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
+    requireConfigurationPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
   ) ++ Seq(
+    webUtilPath("async", "requirejs-plugins/async"),
     webUtilPath("css", "requirejs-plugins/css"),
+    webUtilPath("depend", "requirejs-plugins/depend"),
+    webUtilPath("font", "requirejs-plugins/font"),
+    webUtilPath("goog", "requirejs-plugins/goog"),
     webUtilPath("json", "requirejs-plugins/json"),
+    webUtilPath("ng", "requirejs-plugins/ng"),
     webUtilPath("smd", "requirejs-plugins/smd"),
     webUtilPath("text", "requirejs-plugins/text"),
-    webUtilPath("ng", "requirejs-plugins/ng"),
 
     webUtilPath("angular-ui-offcanvas"),
     webUtilPath("angular-appstorage", "angular-appstorage/appStorage"),

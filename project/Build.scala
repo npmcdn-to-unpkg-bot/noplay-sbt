@@ -5,14 +5,17 @@ import sbt.Keys._
 import sbt._
 
 object BuildDependencies {
-  val sbtWebCoreVersion = "3.23.0"
+  val sbtWebCoreVersion = "3.24.0"
   val sbtWebCore = "com.byteground" %% "byteground-sbt-web-core-plugins" % sbtWebCoreVersion
+
+  val sbtRjsVersion = "1.0.7"
+  val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
 
   val sbtLessVersion = "1.1.1"
   val sbtLess = "com.typesafe.sbt" %% "sbt-less" % sbtLessVersion
 
-  val sbtRjsVersion = "1.0.7"
-  val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
+  val sbtSassVersion = "0.9.3"
+  val sbtSass = "org.madoushi.sbt" % "sbt-sass" % sbtSassVersion
 }
 
 object Build
@@ -27,8 +30,9 @@ object Build
       val scalaBV = scalaBinaryVersion.value
       Seq(
         sbtPluginExtra(sbtWebCore, sbtBV, scalaBV),
+        sbtPluginExtra(sbtRjs, sbtBV, scalaBV),
         sbtPluginExtra(sbtLess, sbtBV, scalaBV),
-        sbtPluginExtra(sbtRjs, sbtBV, scalaBV)
+        sbtPluginExtra(sbtSass, sbtBV, scalaBV)
       )
     }
   ).enablePlugins(SbtScripted)

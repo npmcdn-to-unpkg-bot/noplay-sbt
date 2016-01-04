@@ -17,38 +17,41 @@ package com.byteground.sbt
 
 import com.byteground.sbt.SbtRequire.autoImport._
 import com.byteground.sbt.util.Javascript
-import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
 import sbt._
 
-object SbtAngularUiRouter
+object SbtAngularMaterial
   extends AutoPlugin {
   override lazy val requires = SbtAngular
 
   object autoImport {
-    val angularUiRouterVersion = settingKey[String]("Angular UI Router version")
+    val angularMaterialVersion = settingKey[String]("Angular Material version")
   }
 
-  import com.byteground.sbt.SbtAngularUiRouter.autoImport._
+  import com.byteground.sbt.SbtAngularMaterial.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular-ui-router" -> s"${webModulesLib.value}/angular-ui-router/angular-ui-router",
-    requireConfigurationShim += "angular-ui-router" -> RequireConfiguration.Shim.Config(
-      Seq("angular"),
-      init = Some(
-        Javascript.Function(
-          """function(angular) {
-            |  return angular.module("ui.router.compat");
-            |}
-          """.stripMargin
+    requireConfigurationPaths ++= Seq(
+      "angular-material" -> "lib/angular-material/angular-material"
+    ),
+    requireConfigurationShim +=
+      "angular-material" -> RequireConfiguration.Shim.Config(
+        Seq("angular", "angular-animate", "angular-aria"),
+        init = Some(
+          Javascript.Function(
+            """function(angular) {
+              |  return angular.module('ngMaterial');
+              |}
+            """.stripMargin
+          )
         )
       )
-    )
   )
 
   override lazy val projectSettings = Seq(
-    angularUiRouterVersion := "0.2.15",
-    libraryDependencies += "org.webjars" % "angular-ui-router" % angularUiRouterVersion.value
+    angularMaterialVersion := "1.0.0",
+    libraryDependencies += "org.webjars" % "angular-material" % angularMaterialVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
+
 }

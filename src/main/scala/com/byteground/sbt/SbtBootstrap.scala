@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,28 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
 import sbt._
 
-object SbtAngularJs
+object SbtBootstrap
   extends AutoPlugin {
-  override lazy val requires = SbtRequireJs
+  override lazy val requires = SbtRequire
 
   object autoImport {
-    val angularJsVersion = settingKey[String]( "Angular Js version" )
+    val bootstrapVersion = settingKey[String]( "Bootstrap Js version" )
   }
 
-  import com.byteground.sbt.SbtAngularJs.autoImport._
+  import com.byteground.sbt.SbtBootstrap.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "angular" -> s"${webModulesLib.value}/angularjs/angular",
-    requireJsConfigurationShim += "angular" -> RequireJsConfiguration.Shim.Config( exports = Some( "angular" ) )
+    requireConfigurationPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
   )
 
   override lazy val projectSettings = Seq(
-    angularJsVersion := "1.3.4-1",
-    libraryDependencies += "org.webjars" % "angularjs" % angularJsVersion.value
+    bootstrapVersion := "3.3.5",
+    libraryDependencies += "org.webjars" % "bootstrap" % bootstrapVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

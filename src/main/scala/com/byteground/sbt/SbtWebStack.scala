@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ object SbtWebStack
   extends AutoPlugin {
   override lazy val requires =
     SbtWeb &&
-      SbtRequireJs &&
+      SbtRequire &&
       SbtJquery &&
       SbtQ &&
-      SbtAngularJs &&
-      SbtBootstrapJs &&
+      SbtAngular &&
+      SbtBootstrap &&
       SbtFontAwesome &&
       SbtLess &&
       SbtRjs &&

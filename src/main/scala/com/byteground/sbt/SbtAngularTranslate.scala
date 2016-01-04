@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularTranslate
   extends AutoPlugin {
-  override lazy val requires = SbtAngularJs
+  override lazy val requires = SbtAngular
 
   object autoImport {
     val angularTranslateVersion = settingKey[String]( "Angular Translate version" )
@@ -33,12 +33,12 @@ object SbtAngularTranslate
   import com.byteground.sbt.SbtAngularTranslate.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths ++= Seq(
+    requireConfigurationPaths ++= Seq(
       "angular-translate" -> s"${webModulesLib.value}/angular-translate/angular-translate",
       "angular-translate-loader-partial" -> s"${webModulesLib.value}/angular-translate-loader-partial/angular-translate-loader-partial"
     ),
-    requireJsConfigurationShim ++= Seq(
-      "angular-translate" -> RequireJsConfiguration.Shim.Config(
+    requireConfigurationShim ++= Seq(
+      "angular-translate" -> RequireConfiguration.Shim.Config(
         Seq("angular"),
         init = Some(
           Javascript.Function(
@@ -49,14 +49,14 @@ object SbtAngularTranslate
           )
         )
       ),
-      "angular-translate-loader-partial" -> RequireJsConfiguration.Shim.Config(
+      "angular-translate-loader-partial" -> RequireConfiguration.Shim.Config(
         Seq("angular-translate")
       )
     )
   )
 
   override lazy val projectSettings = Seq(
-    angularTranslateVersion := "2.4.2",
+    angularTranslateVersion := "2.7.0",
     libraryDependencies ++= Seq(
       "org.webjars" % "angular-translate" % angularTranslateVersion.value,
       "org.webjars" % "angular-translate-loader-partial" % angularTranslateVersion.value

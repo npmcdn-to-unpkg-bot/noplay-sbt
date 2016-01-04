@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 ByTeGround, Inc
+ * Copyright © 2009-2016 ByTeGround, Inc
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.byteground.sbt
 
-import com.byteground.sbt.SbtRequireJs.autoImport._
+import com.byteground.sbt.SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
@@ -23,7 +23,7 @@ import sbt._
 
 object SbtQ
   extends AutoPlugin {
-  override lazy val requires = SbtRequireJs
+  override lazy val requires = SbtRequire
 
   object autoImport {
     val qVersion = settingKey[String]( "The Q library version" )
@@ -32,7 +32,7 @@ object SbtQ
   import com.byteground.sbt.SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireJsConfigurationPaths += "q" -> s"${webModulesLib.value}/q/q"
+    requireConfigurationPaths += "q" -> s"${webModulesLib.value}/q/q"
   )
 
   override lazy val projectSettings = Seq(

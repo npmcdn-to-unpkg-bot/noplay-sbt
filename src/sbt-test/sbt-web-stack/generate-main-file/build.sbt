@@ -1,6 +1,6 @@
 lazy val root = (project in file(".")).enablePlugins(SbtWebStack).settings(
-  requireJsConfigurationPaths in Assets += "index" -> "index",
-  requireJsMainModuleId in Assets := "index",
-  requireJsConfigurationPaths in TestAssets += "index" -> "index",
-  requireJsMainModuleId in TestAssets := "index"
+  requireConfigurationPaths in Assets += "index" -> "index",
+  requireMainModuleId in Assets := "index",
+  requireConfigurationPaths in TestAssets += "index" -> "index",
+  requireMainModuleId in TestAssets := "index"
 )
