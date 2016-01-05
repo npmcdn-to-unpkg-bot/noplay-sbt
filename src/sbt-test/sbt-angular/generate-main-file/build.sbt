@@ -1,4 +1,4 @@
-lazy val root = (project in file(".")).enablePlugins(SbtAngularJs).settings(
+lazy val root = (project in file(".")).enablePlugins(SbtAngular).settings(
   requireConfigurationPaths in Assets += "index" -> "index",
   requireMainModuleId in Assets := "index",
   requireConfigurationPaths in TestAssets += "index" -> "index",

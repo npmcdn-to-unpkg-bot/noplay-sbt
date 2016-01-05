@@ -1,4 +1,4 @@
-lazy val root = (project in file(".")).enablePlugins(SbtBootstrapJs).settings(
+lazy val root = (project in file(".")).enablePlugins(SbtBootstrap).settings(
   requireConfigurationPaths in Assets += "index" -> "index",
   requireMainModuleId in Assets := "index",
   requireConfigurationPaths in TestAssets += "index" -> "index",
