@@ -32,8 +32,9 @@ object SbtWebUtil
       SbtJquery
 
   object autoImport {
-    val webUtilName = settingKey[String]( "ByTeGround Web Util name" )
-    val webUtilVersion = settingKey[String]( "ByTeGround Web Util version" )
+    val webUtilName = settingKey[String]("ByTeGround Web Util name")
+    val webUtilVersion = settingKey[String]("ByTeGround Web Util version")
+    val webUtilModule = settingKey[ModuleID]("ByTeGround Web Util module")
 
     def webUtilPath(name: String): Def.Setting[_] =
       webUtilPath(name, None)
@@ -79,6 +80,7 @@ object SbtWebUtil
   override lazy val projectSettings = Seq(
     webUtilName := "byteground-web-util",
     webUtilVersion := "0.2.2",
-    libraryDependencies += "com.byteground" % webUtilName.value % webUtilVersion.value
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
+    webUtilModule := "com.byteground" % webUtilName.value % webUtilVersion.value,
+    libraryDependencies += webUtilModule.value
+  ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
