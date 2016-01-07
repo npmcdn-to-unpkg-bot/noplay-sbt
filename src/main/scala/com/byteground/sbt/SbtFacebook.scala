@@ -57,6 +57,7 @@ object SbtFacebook
   )
 
   override lazy val projectSettings = Seq(
-    facebookDefaultVersion := "2.5"
+    facebookDefaultVersion := "2.5",
+    facebookDefaultXfbmlEnabled := true
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }

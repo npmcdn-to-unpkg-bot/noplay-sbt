@@ -37,6 +37,6 @@ object SbtFlagIcon
 
   override lazy val projectSettings = Seq(
     flagIconVersion := "0.7.1",
-    libraryDependencies += "org.webjars" % "flag-icon" % flagIconVersion.value
+    libraryDependencies += "org.webjars" % "flag-icon-css" % flagIconVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
