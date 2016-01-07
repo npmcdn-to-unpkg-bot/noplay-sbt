@@ -51,6 +51,54 @@ object SbtWebUtil
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
   ) ++ Seq(
+    webUtilPath("angular-analytics"),
+    webUtilPath("angular-auth", "angular-auth/auth"),
+    webUtilPath("angular-autofocus", "angular-autofocus/autofocus"),
+    webUtilPath("angular-beforeunload", "angular-beforeunload/beforeunload"),
+    webUtilPath("angular-bootstrap-form"),
+    webUtilPath("angular-clipboard", "angular-clipboard/clipboard"),
+    webUtilPath("angular-debounce", "angular-debounce/debounce"),
+    webUtilPath("angular-facebook", "angular-facebook/angular-facebook"),
+    webUtilPath("angular-flags", "angular-flags/flags"),
+    webUtilPath("angular-form", "angular-form/form"),
+    webUtilPath("angular-geo", "angular-geo/geo"),
+    webUtilPath("angular-google-chart", "angular-google-chart/google-chart"),
+    webUtilPath("angular-link", "angular-link/link"),
+    webUtilPath("angular-mediawiki", "angular-mediawiki/mediawiki"),
+    webUtilPath("angular-require", "angular-require/require"),
+    webUtilPath("angular-scroll", "angular-scroll/scroll"),
+    webUtilPath("angular-session", "angular-session/session"),
+    webUtilPath("angular-social", "angular-social/social"),
+    webUtilPath("angular-time", "angular-time/time"),
+    webUtilPath("angular-translate-loader", "angular-translate-loader/loader"),
+    webUtilPath("angular-twitter", "angular-twitter/angular-twitter"),
+    webUtilPath("angular-ui-bootstrap-clipboard", "angular-ui-bootstrap-clipboard/clipboard"),
+    webUtilPath("angular-ui-dialog"),
+    webUtilPath("angular-ui-offcanvas"),
+    webUtilPath("angular-ui-range", "angular-ui-range"),
+    webUtilPath("angular-ui-spinner", "angular-ui-spinner"),
+    webUtilPath("angular-unit", "angular-unit/unit"),
+    webUtilPath("angular-upload"),
+    webUtilPath("angular-url", "angular-url/url"),
+    webUtilPath("angular-webstorage", "angular-webstorage/webStorage"),
+
+    webUtilPath("bootloader"),
+
+    webUtilPath("bootstrap-flex", "angular-flex/flex"),
+    webUtilPath("bootstrap-ratio", "angular-ratio/ratio"),
+    webUtilPath("bootstrap-social", "angular-social/social"),
+
+    webUtilPath("dom"),
+    webUtilPath("google"),
+    webUtilPath("json/jsonp"),
+    webUtilPath("json/jsonrpc"),
+    webUtilPath("json/jsonschema"),
+    webUtilPath("math"),
+    webUtilPath("oauth"),
+    webUtilPath("timer"),
+    webUtilPath("util"),
+    webUtilPath("uuid"),
+
     webUtilPath("async", "requirejs-plugins/async"),
     webUtilPath("css", "requirejs-plugins/css"),
     webUtilPath("depend", "requirejs-plugins/depend"),
@@ -61,20 +109,8 @@ object SbtWebUtil
     webUtilPath("smd", "requirejs-plugins/smd"),
     webUtilPath("text", "requirejs-plugins/text"),
 
-    webUtilPath("angular-ui-offcanvas"),
-    webUtilPath("angular-appstorage", "angular-appstorage/appStorage"),
-    webUtilPath("angular-analytics"),
-    webUtilPath("angular-auth", "angular-auth/auth"),
-    webUtilPath("angular-session", "angular-session/session"),
-    webUtilPath("angular-webstorage", "angular-webstorage/webStorage"),
-    webUtilPath("angular-time", "angular-time/time"),
-
-    webUtilPath("json/jsonschema"),
-    webUtilPath("json/jsonrpc"),
-    webUtilPath("json/jsonp"),
-    webUtilPath("rpc"),
-
-    webUtilPath("google")
+    webUtilPath("n"),
+    webUtilPath("rpc")
   )
 
   override lazy val projectSettings = Seq(
