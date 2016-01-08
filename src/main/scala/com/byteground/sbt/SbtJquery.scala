@@ -32,7 +32,7 @@ object SbtJquery
   import com.byteground.sbt.SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "jquery" -> s"${webModulesLib.value}/jquery/jquery",
+    requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/jquery",
     requireConfigurationShim += "jquery" -> RequireConfiguration.Shim.Config( exports = Some( "jQuery" ) )
   )
 

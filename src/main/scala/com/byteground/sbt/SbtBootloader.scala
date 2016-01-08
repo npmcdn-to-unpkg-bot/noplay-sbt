@@ -36,7 +36,7 @@ object SbtBootloader
   import autoImport._
 
   val unscopedProjectSettings = Seq(
-    bootloaderStyle := s"${webModulesLib.value}/${webUtilName.value}/bootloader/bootloader.css",
+    bootloaderStyle := s"/${webModulesLib.value}/${webUtilName.value}/bootloader/bootloader.css",
     webIndexEmbeddedStyles ++= Seq[Style](
       bootloaderStyle.value
     ),

@@ -32,7 +32,7 @@ object SbtQ
   import com.byteground.sbt.SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "q" -> s"${webModulesLib.value}/q/q"
+    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q"
   )
 
   override lazy val projectSettings = Seq(
