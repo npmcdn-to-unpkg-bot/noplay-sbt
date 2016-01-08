@@ -39,7 +39,14 @@ object SbtAngularUiRouter
       init = Some(
         Javascript.Function(
           """function(angular) {
-            |  return angular.module("ui.router.compat");
+            |  return angular
+            |    .module("ui.router.compat")
+            |    .config(["$provide", function ($provide) {
+            |      $provide.decorator("$templateFactory", ["$templateRequest", "$delegate", function ($templateRequest, $delegate) {
+            |        $delegate.fromUrl = $templateRequest;//override
+            |        return $delegate;
+            |      }]);
+            |    }]);
             |}
           """.stripMargin
         )
