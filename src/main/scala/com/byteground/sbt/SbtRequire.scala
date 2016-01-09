@@ -25,7 +25,10 @@ import sbt._
 
 object SbtRequire
   extends AutoPlugin {
-  override lazy val requires = SbtWebIndex && SbtRjs
+
+  private val DefaultRequireMainTemplate = "/com/byteground/sbt/requirejs.js.ftl"
+
+  override val requires = SbtWebIndex && SbtRjs
 
   object autoImport {
 
@@ -296,13 +299,11 @@ object SbtRequire
 
   import com.byteground.sbt.SbtRequire.autoImport._
 
-  override lazy val projectSettings =
+  override val projectSettings =
     inConfig(Assets)(unscopedProjectSettings) ++
       inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
       requireVersion := "2.1.15",
       requirePath := webModulesLib.value + "/requirejs/require.js",
       libraryDependencies += "org.webjars" % "requirejs" % requireVersion.value
     )
-
-  private val DefaultRequireMainTemplate = "/com/byteground/sbt/requirejs.js.ftl"
 }

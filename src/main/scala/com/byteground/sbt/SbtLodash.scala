@@ -23,6 +23,9 @@ import sbt._
 
 object SbtLodash
   extends AutoPlugin {
+
+  override val requires = SbtRequire
+
   object autoImport {
     val lodashVersion = settingKey[String]("Lodash version")
   }
@@ -35,7 +38,7 @@ object SbtLodash
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     lodashVersion := "3.3.1",
     libraryDependencies += "org.webjars" % "lodash" % lodashVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

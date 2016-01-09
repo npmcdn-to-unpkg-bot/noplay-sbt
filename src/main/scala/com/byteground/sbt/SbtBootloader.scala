@@ -27,7 +27,7 @@ object SbtBootloader
   import com.byteground.sbt.SbtWebUtil.autoImport._
   import com.byteground.sbt.SbtWebIndex.autoImport._
 
-  override lazy val requires = SbtWebUtil
+  override val requires = SbtWebUtil
 
   object autoImport {
     val bootloaderStyle = settingKey[Style]( "Bootloader style" )

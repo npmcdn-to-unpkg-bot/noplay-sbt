@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularMaterial
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular
 
   object autoImport {
     val angularMaterialVersion = settingKey[String]("Angular Material version")
@@ -50,7 +50,7 @@ object SbtAngularMaterial
       )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularMaterialVersion := "1.0.0",
     libraryDependencies += "org.webjars" % "angular-material" % angularMaterialVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

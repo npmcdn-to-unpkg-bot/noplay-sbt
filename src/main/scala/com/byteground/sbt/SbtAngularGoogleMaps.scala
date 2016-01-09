@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularGoogleMaps
   extends AutoPlugin {
-  override lazy val requires = SbtAngular && SbtLodash
+  override val requires = SbtAngular && SbtLodash
 
   object autoImport {
     val angularGoogleMapsVersion = settingKey[String]("Angular Google Maps version")

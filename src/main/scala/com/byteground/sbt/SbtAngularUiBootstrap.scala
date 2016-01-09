@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularUiBootstrap
   extends AutoPlugin {
-  override lazy val requires = SbtBootstrap && SbtAngular
+  override val requires = SbtBootstrap && SbtAngular
 
   object autoImport {
     val angularUiBootstrapVersion = settingKey[String]("Angular Ui Bootstrap version")
@@ -47,7 +47,7 @@ object SbtAngularUiBootstrap
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularUiBootstrapVersion := "0.13.4",
     libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

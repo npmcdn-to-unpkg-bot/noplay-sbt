@@ -24,7 +24,8 @@ import sbt._
 
 object SbtAngular
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+
+  override val requires = SbtRequire
 
   object autoImport {
     val angularVersion = settingKey[String]("AngularJs version")

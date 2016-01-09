@@ -23,7 +23,7 @@ import sbt._
 
 object SbtFlagIcon
   extends AutoPlugin {
-  override lazy val requires = SbtRequire && SbtBootstrap
+  override val requires = SbtRequire
 
   object autoImport {
     val flagIconVersion = settingKey[String]( "The flag icon version" )
@@ -35,7 +35,7 @@ object SbtFlagIcon
     requireConfigurationPaths += "flag-icon-css" -> s"/${webModulesLib.value}/flag-icon-css"
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     flagIconVersion := "0.7.1",
     libraryDependencies += "org.webjars" % "flag-icon-css" % flagIconVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )

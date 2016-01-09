@@ -23,7 +23,7 @@ import sbt._
 
 object SbtFontAwesome
   extends AutoPlugin {
-  override lazy val requires = SbtRequire && SbtBootstrap
+  override lazy val requires = SbtRequire
 
   object autoImport {
     val fontAwesomeVersion = settingKey[String]( "The font awesome version" )

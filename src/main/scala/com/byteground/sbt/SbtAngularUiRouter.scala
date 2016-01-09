@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularUiRouter
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular
 
   object autoImport {
     val angularUiRouterVersion = settingKey[String]("Angular UI Router version")
@@ -54,7 +54,7 @@ object SbtAngularUiRouter
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularUiRouterVersion := "0.2.15",
     libraryDependencies += "org.webjars" % "angular-ui-router" % angularUiRouterVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

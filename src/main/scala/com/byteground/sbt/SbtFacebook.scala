@@ -24,7 +24,7 @@ import sbt._
 
 object SbtFacebook
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+  override val requires = SbtRequire
 
   object autoImport {
     val facebookDefaultVersion = settingKey[String]("Facebook Sdk version")
@@ -56,7 +56,7 @@ object SbtFacebook
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     facebookDefaultVersion := "2.5",
     facebookDefaultXfbmlEnabled := true
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

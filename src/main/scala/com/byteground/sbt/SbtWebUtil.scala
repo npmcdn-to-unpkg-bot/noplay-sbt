@@ -25,7 +25,7 @@ import scala.language.existentials
 
 object SbtWebUtil
   extends AutoPlugin {
-  override lazy val requires =
+  override val requires =
     SbtAngular &&
       SbtBootstrap &&
       SbtQ &&
@@ -113,7 +113,7 @@ object SbtWebUtil
     webUtilPath("rpc")
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     webUtilName := "byteground-web-util",
     webUtilVersion := "0.2.2",
     webUtilModule := "com.byteground" % webUtilName.value % webUtilVersion.value,

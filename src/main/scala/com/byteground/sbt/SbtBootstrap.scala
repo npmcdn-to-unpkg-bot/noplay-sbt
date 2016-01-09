@@ -23,10 +23,10 @@ import sbt._
 
 object SbtBootstrap
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+  override val requires = SbtRequire
 
   object autoImport {
-    val bootstrapVersion = settingKey[String]( "Bootstrap Js version" )
+    val bootstrapVersion = settingKey[String]( "Bootstrap version" )
   }
 
   import com.byteground.sbt.SbtBootstrap.autoImport._
@@ -35,7 +35,7 @@ object SbtBootstrap
     requireConfigurationPaths += "bootstrap" -> s"/${webModulesLib.value}/bootstrap"
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     bootstrapVersion := "3.3.5",
     libraryDependencies += "org.webjars" % "bootstrap" % bootstrapVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )

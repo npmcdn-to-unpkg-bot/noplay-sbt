@@ -1,4 +1,4 @@
-lazy val root = (project in file(".")).enablePlugins(SbtLess).settings(
+lazy val root = (project in file(".")).enablePlugins(SbtLess).settings(v
   libraryDependencies ++= Seq(
     "org.webjars" % "bootstrap" % "3.3.6"
   ),
