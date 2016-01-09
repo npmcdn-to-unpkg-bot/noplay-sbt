@@ -16,39 +16,31 @@
 package com.byteground.sbt
 
 import com.byteground.sbt.SbtRequire.autoImport._
-import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
 import sbt._
 
-object SbtAngularUiBootstrap
+object SbtLodash
   extends AutoPlugin {
-  override val requires = SbtBootstrap && SbtAngular
+
+  override val requires = SbtRequire
 
   object autoImport {
-    val angularUiBootstrapVersion = settingKey[String]("Angular Ui Bootstrap version")
+    val lodashVersion = settingKey[String]("Lodash version")
   }
 
-  import com.byteground.sbt.SbtAngularUiBootstrap.autoImport._
+  import com.byteground.sbt.SbtLodash.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular-ui-bootstrap" -> s"/${webModulesLib.value}/angular-ui-bootstrap/ui-bootstrap-tpls",
-    requireConfigurationShim += "angular-ui-bootstrap" -> RequireConfiguration.Shim.Config(
-      Seq("angular"),
-      init = Some(
-        Javascript.Function(
-          """function(angular) {
-            |  return angular.module("ui.bootstrap");
-            |}
-          """.stripMargin
-        )
-      )
+    requireConfigurationPaths ++= Seq(
+      "lodash" -> s"/${webModulesLib.value}/lodash/lodash"
     )
   )
 
   override val projectSettings = Seq(
-    angularUiBootstrapVersion := "0.13.4",
-    libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
+    lodashVersion := "3.3.1",
+    libraryDependencies += "org.webjars" % "lodash" % lodashVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
+
 }

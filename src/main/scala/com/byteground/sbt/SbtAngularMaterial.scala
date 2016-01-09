@@ -17,13 +17,14 @@ package com.byteground.sbt
 
 import com.byteground.sbt.SbtRequire.autoImport._
 import com.byteground.sbt.util.Javascript
+import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import sbt.Keys._
 import sbt._
 
 object SbtAngularMaterial
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular
 
   object autoImport {
     val angularMaterialVersion = settingKey[String]("Angular Material version")
@@ -33,7 +34,7 @@ object SbtAngularMaterial
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths ++= Seq(
-      "angular-material" -> "lib/angular-material/angular-material"
+      "angular-material" -> s"/${webModulesLib.value}/angular-material/angular-material"
     ),
     requireConfigurationShim +=
       "angular-material" -> RequireConfiguration.Shim.Config(
@@ -49,7 +50,7 @@ object SbtAngularMaterial
       )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularMaterialVersion := "1.0.0",
     libraryDependencies += "org.webjars" % "angular-material" % angularMaterialVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

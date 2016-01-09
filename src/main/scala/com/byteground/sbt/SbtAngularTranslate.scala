@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularTranslate
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular
 
   object autoImport {
     val angularTranslateVersion = settingKey[String]( "Angular Translate version" )
@@ -34,8 +34,8 @@ object SbtAngularTranslate
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths ++= Seq(
-      "angular-translate" -> s"${webModulesLib.value}/angular-translate/angular-translate",
-      "angular-translate-loader-partial" -> s"${webModulesLib.value}/angular-translate-loader-partial/angular-translate-loader-partial"
+      "angular-translate" -> s"/${webModulesLib.value}/angular-translate/angular-translate",
+      "angular-translate-loader-partial" -> s"/${webModulesLib.value}/angular-translate-loader-partial/angular-translate-loader-partial"
     ),
     requireConfigurationShim ++= Seq(
       "angular-translate" -> RequireConfiguration.Shim.Config(
@@ -55,7 +55,7 @@ object SbtAngularTranslate
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularTranslateVersion := "2.7.0",
     libraryDependencies ++= Seq(
       "org.webjars" % "angular-translate" % angularTranslateVersion.value,

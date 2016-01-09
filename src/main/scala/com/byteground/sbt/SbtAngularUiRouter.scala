@@ -24,7 +24,7 @@ import sbt._
 
 object SbtAngularUiRouter
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular
 
   object autoImport {
     val angularUiRouterVersion = settingKey[String]("Angular UI Router version")
@@ -33,13 +33,20 @@ object SbtAngularUiRouter
   import com.byteground.sbt.SbtAngularUiRouter.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular-ui-router" -> s"${webModulesLib.value}/angular-ui-router/angular-ui-router",
+    requireConfigurationPaths += "angular-ui-router" -> s"/${webModulesLib.value}/angular-ui-router/angular-ui-router",
     requireConfigurationShim += "angular-ui-router" -> RequireConfiguration.Shim.Config(
       Seq("angular"),
       init = Some(
         Javascript.Function(
           """function(angular) {
-            |  return angular.module("ui.router.compat");
+            |  return angular
+            |    .module("ui.router.compat")
+            |    .config(["$provide", function ($provide) {
+            |      $provide.decorator("$templateFactory", ["$templateRequest", "$delegate", function ($templateRequest, $delegate) {
+            |        $delegate.fromUrl = $templateRequest;//override
+            |        return $delegate;
+            |      }]);
+            |    }]);
             |}
           """.stripMargin
         )
@@ -47,7 +54,7 @@ object SbtAngularUiRouter
     )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     angularUiRouterVersion := "0.2.15",
     libraryDependencies += "org.webjars" % "angular-ui-router" % angularUiRouterVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

@@ -18,12 +18,13 @@ package com.byteground.sbt
 import com.byteground.sbt.SbtRequire.autoImport._
 import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import._
+import com.typesafe.sbt.web.Import.WebKeys._
 import sbt.Keys._
 import sbt._
 
 object SbtAngularGoogleMaps
   extends AutoPlugin {
-  override lazy val requires = SbtAngular
+  override val requires = SbtAngular && SbtLodash
 
   object autoImport {
     val angularGoogleMapsVersion = settingKey[String]("Angular Google Maps version")
@@ -33,8 +34,7 @@ object SbtAngularGoogleMaps
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths ++= Seq(
-      "lodash" -> "lib/lodash/lodash",
-      "angular-google-maps" -> "lib/angular-google-maps/angular-google-maps"
+      "angular-google-maps" -> s"/${webModulesLib.value}/angular-google-maps/angular-google-maps"
     ),
     requireConfigurationShim +=
       "angular-google-maps" -> RequireConfiguration.Shim.Config(
@@ -67,7 +67,6 @@ object SbtAngularGoogleMaps
   override lazy val projectSettings = Seq(
     angularGoogleMapsVersion := "2.1.1",
     libraryDependencies ++= Seq(
-      "org.webjars" % "lodash" % "3.3.1",
       "org.webjars" % "angular-google-maps" % angularGoogleMapsVersion.value exclude("org.webjars", "lodash")
     )
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)

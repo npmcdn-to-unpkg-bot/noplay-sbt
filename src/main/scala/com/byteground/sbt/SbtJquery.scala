@@ -23,7 +23,7 @@ import sbt._
 
 object SbtJquery
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+  override val requires = SbtRequire
 
   object autoImport {
     val jqueryVersion = settingKey[String]( "The Jquery version" )
@@ -32,11 +32,11 @@ object SbtJquery
   import com.byteground.sbt.SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "jquery" -> s"${webModulesLib.value}/jquery/jquery",
+    requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/jquery",
     requireConfigurationShim += "jquery" -> RequireConfiguration.Shim.Config( exports = Some( "jQuery" ) )
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     jqueryVersion := "2.1.1",
     libraryDependencies += "org.webjars" % "jquery" % jqueryVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )

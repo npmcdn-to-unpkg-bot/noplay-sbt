@@ -25,7 +25,7 @@ import scala.language.existentials
 
 object SbtWebUtil
   extends AutoPlugin {
-  override lazy val requires =
+  override val requires =
     SbtAngular &&
       SbtBootstrap &&
       SbtQ &&
@@ -43,7 +43,7 @@ object SbtWebUtil
       webUtilPath(name, Some(path))
 
     private def webUtilPath(name: String, path: Option[String]): Def.Setting[_] =
-      requireConfigurationPaths += name -> s"${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
+      requireConfigurationPaths += name -> s"/${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
   }
 
   import com.byteground.sbt.SbtWebUtil.autoImport._
@@ -96,7 +96,7 @@ object SbtWebUtil
     webUtilPath("math"),
     webUtilPath("oauth"),
     webUtilPath("timer"),
-    webUtilPath("util"),
+    webUtilPath("util", "util/util"),
     webUtilPath("uuid"),
 
     webUtilPath("async", "requirejs-plugins/async"),
@@ -113,7 +113,7 @@ object SbtWebUtil
     webUtilPath("rpc")
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     webUtilName := "byteground-web-util",
     webUtilVersion := "0.2.2",
     webUtilModule := "com.byteground" % webUtilName.value % webUtilVersion.value,

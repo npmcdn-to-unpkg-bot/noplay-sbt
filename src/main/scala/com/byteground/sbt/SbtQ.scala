@@ -23,7 +23,7 @@ import sbt._
 
 object SbtQ
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+  override val requires = SbtRequire
 
   object autoImport {
     val qVersion = settingKey[String]( "The Q library version" )
@@ -32,10 +32,10 @@ object SbtQ
   import com.byteground.sbt.SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "q" -> s"${webModulesLib.value}/q/q"
+    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q"
   )
 
-  override lazy val projectSettings = Seq(
+  override val projectSettings = Seq(
     qVersion := "1.0.1",
     libraryDependencies += "org.webjars" % "q" % qVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )

@@ -23,7 +23,7 @@ import sbt._
 
 object SbtFontAwesome
   extends AutoPlugin {
-  override lazy val requires = SbtRequire && SbtBootstrap
+  override lazy val requires = SbtRequire
 
   object autoImport {
     val fontAwesomeVersion = settingKey[String]( "The font awesome version" )
@@ -32,7 +32,7 @@ object SbtFontAwesome
   import com.byteground.sbt.SbtFontAwesome.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "font-awesome" -> s"${webModulesLib.value}/font-awesome"
+    requireConfigurationPaths += "font-awesome" -> s"/${webModulesLib.value}/font-awesome"
   )
 
   override lazy val projectSettings = Seq(

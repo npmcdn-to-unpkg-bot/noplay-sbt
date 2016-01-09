@@ -24,7 +24,8 @@ import sbt._
 
 object SbtAngular
   extends AutoPlugin {
-  override lazy val requires = SbtRequire
+
+  override val requires = SbtRequire
 
   object autoImport {
     val angularVersion = settingKey[String]("AngularJs version")
@@ -34,7 +35,7 @@ object SbtAngular
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths +=
-      "angular" -> s"${webModulesLib.value}/angularjs/angular"
+      "angular" -> s"/${webModulesLib.value}/angularjs/angular"
     ,
     requireConfigurationShim +=
       "angular" -> RequireConfiguration.Shim.Config(exports = Some("angular"))
@@ -56,7 +57,7 @@ object SbtAngular
     val fullName = s"angular-$name"
     Seq(
       requireConfigurationPaths +=
-        fullName -> s"${webModulesLib.value}/angularjs/$fullName",
+        fullName -> s"/${webModulesLib.value}/angularjs/$fullName",
       requireConfigurationShim +=
         fullName -> RequireConfiguration.Shim.Config(
           Seq("angular"),
