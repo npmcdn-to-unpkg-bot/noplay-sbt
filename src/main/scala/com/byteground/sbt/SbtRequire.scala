@@ -303,7 +303,7 @@ object SbtRequire
     inConfig(Assets)(unscopedProjectSettings) ++
       inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
       requireVersion := "2.1.15",
-      requirePath := webModulesLib.value + "/requirejs/require.js",
+      requirePath := "/" + webModulesLib.value + "/requirejs/require.js",
       libraryDependencies += "org.webjars" % "requirejs" % requireVersion.value
     )
 }
