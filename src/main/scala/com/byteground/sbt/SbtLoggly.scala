@@ -78,6 +78,8 @@ object SbtLoggly
                 |
                 |  var key = config.key;
                 |  var sendConsoleErrors = config.sendConsoleErrors === undefined || !!config.sendConsoleErrors;
+                |  var sendLogErrors = !!config.sendLogErrors;
+                |  var sendRequireErrors = !!config.sendRequireErrors;
                 |  var tag = config.tag || 'loggly-jslogger';
                 |  var useDomainProxy = config.useDomainProxy !== undefined && !!config.useDomainProxy;
                 |  var trackerConfig = {
@@ -93,26 +95,30 @@ object SbtLoggly
                 |  var _LTracker = window._LTracker || [];
                 |  _LTracker.push(config);
                 |
-                |  var _consoleError = window && window.console && window.console.error || function() {};
-                |  console.error = function() {
-                |    _LTracker.push({
-                |      category: 'ConsoleError',
-                |      exception: arguments
-                |    });
-                |    return _consoleError.apply(this, arguments);
-                |  };
-                |
-                |  var _onError = requirejs.onError;
-                |  requirejs.onError = function (error) {
-                |    _LTracker.push({
-                |      category: 'RequireJsException',
-                |      exception: error
-                |    });
-                |    if (_onError && typeof _onError === 'function') {
-                |      _onError.apply(requirejs, arguments);
-                |    }
-                |    throw error;
-                |  };
+                |  if (sendLogErrors) {
+                |    var _consoleError = window.console.error || function() {};
+                |    window.console.error = function() {
+                |      _LTracker.push({
+                |        category: 'ConsoleError',
+                |        exception: arguments
+                |      });
+                |      return _consoleError.apply(this, arguments);
+                |    };
+                |  }
+                |  
+                |  if (sendRequireErrors) {
+                |    var _onError = requirejs.onError;
+                |    requirejs.onError = function (error) {
+                |      _LTracker.push({
+                |        category: 'RequireJsException',
+                |        exception: error
+                |      });
+                |      if (_onError && typeof _onError === 'function') {
+                |        _onError.apply(requirejs, arguments);
+                |      }
+                |      throw error;
+                |    };
+                |  }
                 |
                 |  if (config.debug)
                 |    console.debug('[loggly]', 'tracker', _LTracker);
