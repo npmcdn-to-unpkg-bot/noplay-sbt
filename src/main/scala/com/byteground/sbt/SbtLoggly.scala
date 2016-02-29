@@ -100,7 +100,7 @@ object SbtLoggly
                 |      exception: arguments
                 |    });
                 |    return _consoleError.apply(this, arguments);
-                |  }
+                |  };
                 |
                 |  var _onError = requirejs.onError;
                 |  requirejs.onError = function (error) {
