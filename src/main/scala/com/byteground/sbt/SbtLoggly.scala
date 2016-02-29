@@ -93,6 +93,27 @@ object SbtLoggly
                 |  var _LTracker = window._LTracker || [];
                 |  _LTracker.push(config);
                 |
+                |  var _consoleError = window && window.console && window.console.error || function() {};
+                |  console.error = function() {
+                |    _LTracker.push({
+                |      category: 'ConsoleError',
+                |      exception: arguments
+                |    });
+                |    return _consoleError.apply(this, arguments);
+                |  }
+                |
+                |  var _onError = requirejs.onError;
+                |  requirejs.onError = function (error) {
+                |    _LTracker.push({
+                |      category: 'RequireJsException',
+                |      exception: error
+                |    });
+                |    if (_onError && typeof _onError === 'function') {
+                |      _onError.apply(requirejs, arguments);
+                |    }
+                |    throw error;
+                |  };
+                |
                 |  if (config.debug)
                 |    console.debug('[loggly]', 'tracker', _LTracker);
                 |}

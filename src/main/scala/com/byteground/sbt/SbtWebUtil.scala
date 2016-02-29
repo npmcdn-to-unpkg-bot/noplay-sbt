@@ -96,6 +96,7 @@ object SbtWebUtil
     webUtilPath("math"),
     webUtilPath("oauth"),
     webUtilPath("timer"),
+    webUtilPath("logger", "logger/logger"),
     webUtilPath("util", "util/util"),
     webUtilPath("uuid"),
 
