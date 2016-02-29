@@ -74,20 +74,27 @@ object SbtLoggly
                 |  var config = (module.config && module.config()) || {};
                 |
                 |  if (config.debug)
-                |    console.log('[loggly]', 'config', config);
+                |    console.debug('[loggly]', 'config', config);
                 |
                 |  var key = config.key;
                 |  var sendConsoleErrors = config.sendConsoleErrors === undefined || !!config.sendConsoleErrors;
                 |  var tag = config.tag || 'loggly-jslogger';
-                |  var _LTracker = window._LTracker || [];
-                |  _LTracker.push({
+                |  var useDomainProxy = config.useDomainProxy !== undefined && !!config.useDomainProxy;
+                |  var trackerConfig = {
                 |    'logglyKey': key,
                 |    'sendConsoleErrors' : sendConsoleErrors,
-                |    'tag' : tag
-                |  });
+                |    'tag' : tag,
+                |    'useDomainProxy': useDomainProxy
+                |  };
                 |
                 |  if (config.debug)
-                |    console.log('[loggly]', 'tracker', _LTracker);
+                |    console.debug('[loggly]', 'tracker config', trackerConfig);
+                |
+                |  var _LTracker = window._LTracker || [];
+                |  _LTracker.push(config);
+                |
+                |  if (config.debug)
+                |    console.debug('[loggly]', 'tracker', _LTracker);
                 |}
               """.stripMargin
           )
