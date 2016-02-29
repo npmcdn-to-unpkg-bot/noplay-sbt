@@ -85,7 +85,7 @@ object SbtLoggly
                 |    'sendConsoleErrors' : sendConsoleErrors,
                 |    'tag' : tag,
                 |    'useDomainProxy': useDomainProxy
-                |  }
+                |  };
                 |
                 |  if (config.debug)
                 |    console.debug('[loggly]', 'tracker config', trackerConfig);
