@@ -32,7 +32,11 @@ object Build
         sbtPluginExtra(sbtWebCore, sbtBV, scalaBV),
         sbtPluginExtra(sbtRjs, sbtBV, scalaBV),
         sbtPluginExtra(sbtLess, sbtBV, scalaBV),
-        sbtPluginExtra(sbtSass, sbtBV, scalaBV)
+        sbtPluginExtra(sbtSass, sbtBV, scalaBV),
+        // web translate it
+        "org.json4s" %% "json4s-native" % "3.2.11",
+        "org.json4s" %% "json4s-jackson" % "3.2.11",
+        "org.joda" % "joda-convert" % "1.8"
       )
     }
   ).enablePlugins(SbtScripted)
