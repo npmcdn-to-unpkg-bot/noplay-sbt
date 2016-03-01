@@ -78,8 +78,8 @@ object SbtLoggly
                 |
                 |  var key = config.key;
                 |  var sendConsoleErrors = config.sendConsoleErrors === undefined || !!config.sendConsoleErrors;
-                |  var sendLogErrors = !!config.sendLogErrors;
-                |  var sendRequireErrors = !!config.sendRequireErrors;
+                |  var sendLogErrors = config.sendLogErrors !== undefined && !!config.sendLogErrors;
+                |  var sendRequireErrors = config.sendRequireErrors !== undefined && !!config.sendRequireErrors;
                 |  var tag = config.tag || 'loggly-jslogger';
                 |  var useDomainProxy = config.useDomainProxy !== undefined && !!config.useDomainProxy;
                 |  var trackerConfig = {
@@ -93,7 +93,7 @@ object SbtLoggly
                 |    console.debug('[loggly]', 'tracker config', trackerConfig);
                 |
                 |  var _LTracker = window._LTracker || [];
-                |  _LTracker.push(config);
+                |  _LTracker.push(trackerConfig);
                 |
                 |  if (sendLogErrors) {
                 |    var _consoleError = window.console.error || function() {};
