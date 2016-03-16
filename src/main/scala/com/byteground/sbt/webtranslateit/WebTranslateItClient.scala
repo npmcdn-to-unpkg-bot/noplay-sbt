@@ -15,8 +15,6 @@
  */
 package com.byteground.sbt.webtranslateit
 
-import _root_.sprayfix.http.BodyPart
-import _root_.sprayfix.http.MultipartFormData
 import akka.actor.ActorSystem
 import akka.io.IO
 import akka.pattern.ask
@@ -41,10 +39,10 @@ import spray.json._
 import spray.util._
 
 final class WebTranslateItClientException(
-                                           code: Int,
-                                           msg: String,
-                                           error: Option[WebTranslateItClient.Error]
-                                         ) extends Exception(error.fold(s"$code $msg")(e => s"$code $msg - ${e.error}"))
+  code: Int,
+  msg: String,
+  error: Option[WebTranslateItClient.Error]
+) extends Exception(error.fold(s"$code $msg")(e => s"$code $msg - ${e.error}"))
 
 object WebTranslateItClient {
 
@@ -116,43 +114,43 @@ object WebTranslateItClient {
   }
 
   final case class Locale(
-                           name: String,
-                           code: String
-                         )
+    name: String,
+    code: String
+  )
 
   final case class ProjectFile(
-                                id: Long,
-                                name: String,
-                                created_at: Date,
-                                updated_at: Date,
-                                hash_file: String,
-                                master_project_file_id: Option[Long],
-                                locale_code: String
-                              )
+    id: Long,
+    name: String,
+    created_at: Date,
+    updated_at: Date,
+    hash_file: String,
+    master_project_file_id: Option[Long],
+    locale_code: String
+  )
 
   final case class Project(
-                            id: Long,
-                            name: String,
-                            created_at: Date,
-                            updated_at: Date,
-                            source_locale: Locale,
-                            target_locales: Seq[Locale],
-                            project_files: Seq[ProjectFile]
-                          )
+    id: Long,
+    name: String,
+    created_at: Date,
+    updated_at: Date,
+    source_locale: Locale,
+    target_locales: Seq[Locale],
+    project_files: Seq[ProjectFile]
+  )
 
   final case class ShowProjectResponse(project: Project)
 
   final case class Error(
-                          error: String,
-                          request: URI
-                        )
+    error: String,
+    request: URI
+  )
 }
 
 final case class WebTranslateItClient(
-                                       apiUri: URI,
-                                       projectToken: String,
-                                       timeout: FiniteDuration = 60.seconds
-                                     )(implicit ec: ExecutionContext) {
+  apiUri: URI,
+  projectToken: String,
+  timeout: FiniteDuration = 60.seconds
+)(implicit ec: ExecutionContext) {
 
   import WebTranslateItClient.BasicUnmarshallers._
   import WebTranslateItClient.JsonProtocol._
