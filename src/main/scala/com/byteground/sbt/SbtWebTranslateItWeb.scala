@@ -37,7 +37,7 @@ object SbtWebTranslateItWeb
   def configurationSettings(config: Configuration): Seq[Setting[_]] =
     SbtWebTranslateIt.configurationSettings(config) ++ inConfig(config)(
       Seq(
-        webTranslateItMasterDirectories := sourceDirectories.value,
+        webTranslateItMasterDirectories <<= sourceDirectories,
         webTranslateItStage := {
           (mappings: Seq[PathMapping]) =>
             val pulledFiles = webTranslateItPull.value

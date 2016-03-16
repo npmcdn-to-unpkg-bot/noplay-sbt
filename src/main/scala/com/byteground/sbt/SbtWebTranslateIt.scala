@@ -19,10 +19,8 @@ import com.byteground.sbt.webtranslateit.WebTranslateItClient
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.util.{DefaultIndenter, DefaultPrettyPrinter}
 import com.fasterxml.jackson.databind.ObjectWriter
-import com.typesafe.sbt.web.Import._
 import java.net.URI
 import org.json4s._
-import org.json4s.jackson.JsonMethods
 import org.json4s.jackson._
 import sbt.Keys._
 import sbt._
@@ -311,21 +309,11 @@ object SbtWebTranslateIt
   override lazy val projectSettings = Seq(
     webTranslateItRealm := WebTranslateItRealm,
     webTranslateItApiUri := URI.create("https://webtranslateit.com/api/"),
-    webTranslateItProjectToken := {
-      credentials.value
-        .map(Credentials.toDirect)
-        .find(_.realm == webTranslateItRealm.value)
-        .fold(sys.error(s"no project token provided for WebTranslateIt realm: ${webTranslateItRealm.value}!"))(_.passwd)
-    },
-    webTranslateItClient := {
-      WebTranslateItClient(
-        webTranslateItApiUri.value,
-        webTranslateItProjectToken.value
-      )
-    },
-    webTranslateItProject := {
-      Await.result(webTranslateItClient.value.showProject(), Duration.Inf)
-    }
+    webTranslateItProjectToken := credentials.value.map(Credentials.toDirect)
+      .find(_.realm == webTranslateItRealm.value)
+      .fold(sys.error(s"no project token provided for WebTranslateIt realm: ${webTranslateItRealm.value}!"))(_.passwd),
+    webTranslateItClient := WebTranslateItClient(webTranslateItApiUri.value, webTranslateItProjectToken.value),
+    webTranslateItProject := Await.result(webTranslateItClient.value.showProject(), Duration.Inf)
   )
 
   private def normalize(files: Traversable[(File, String)]): Traversable[(File, String)] = files.map { t2 => t2.copy(_2 = t2._2.replace('\\', '/')) }
