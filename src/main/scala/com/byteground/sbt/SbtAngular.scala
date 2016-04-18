@@ -28,7 +28,7 @@ object SbtAngular
   override val requires = SbtRequire
 
   object autoImport {
-    val angularVersion = settingKey[String]("AngularJs version")
+    val angularVersion = settingKey[String]("Angular version")
   }
 
   import com.byteground.sbt.SbtAngular.autoImport._
