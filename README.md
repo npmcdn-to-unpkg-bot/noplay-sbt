@@ -1,2 +1,2 @@
-byteground-sbt-web-stack-plugins
-====================================
+noplay-sbt
+============================

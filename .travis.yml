@@ -1,5 +1,7 @@
-language: scala
+language:
+  scala
 jdk:
   - oraclejdk7
   - oraclejdk8
-script: sbt test scripted
+script:
+  sbt test scripted
