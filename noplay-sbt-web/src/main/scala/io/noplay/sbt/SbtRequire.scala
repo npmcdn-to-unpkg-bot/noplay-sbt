@@ -18,9 +18,8 @@ package io.noplay.sbt
 import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
-import io.alphard.sbt.SbtWebIndex
-import io.alphard.sbt.SbtWebIndex.autoImport._
 import io.alphard.sbt.util.Javascript
+import io.noplay.sbt.SbtWebIndex.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -50,7 +49,9 @@ object SbtRequire
       type Paths = Seq[(RequireModule.Id, RequireModule.Path)]
       type Bundles = Seq[(RequireModule.Id, Seq[RequireModule.Path])]
       type Shim = Seq[(String, Shim.Config)]
+
       object Shim {
+
         case class Config(deps: Seq[RequireModule.Id] = Nil,
                           exports: Option[String] = None,
                           init: Option[Javascript.Function] = None) {
@@ -63,37 +64,38 @@ object SbtRequire
         }
 
       }
+
       type _Map = Seq[(String, Map[RequireModule.Id, RequireModule.Id])]
       type Packages = Seq[(RequireModule.Id, RequirePackage)]
       type Config = Seq[(RequireModule.Id, Map[String, Any])]
     }
 
     case class RequireConfiguration(baseUrl: Option[String],
-                                      paths: RequireConfiguration.Paths,
-                                      bundles: RequireConfiguration.Bundles,
-                                      shim: RequireConfiguration.Shim,
-                                      map: RequireConfiguration._Map,
-                                      config: RequireConfiguration.Config,
-                                      packages: RequireConfiguration.Packages,
-                                      nodeIdCompat: Boolean,
-                                      waitSeconds: Int,
-                                      context: Option[String],
-                                      deps: Seq[RequireModule.Id],
-                                      callback: Option[Javascript.Function],
-                                      enforceDefine: Boolean,
-                                      xhtml: Boolean,
-                                      urlArgs: Option[String],
-                                      scriptType: String,
-                                      skipDataMain: Boolean) {
+                                    paths: RequireConfiguration.Paths,
+                                    bundles: RequireConfiguration.Bundles,
+                                    shim: RequireConfiguration.Shim,
+                                    map: RequireConfiguration._Map,
+                                    config: RequireConfiguration.Config,
+                                    packages: RequireConfiguration.Packages,
+                                    nodeIdCompat: Boolean,
+                                    waitSeconds: Int,
+                                    context: Option[String],
+                                    deps: Seq[RequireModule.Id],
+                                    callback: Option[Javascript.Function],
+                                    enforceDefine: Boolean,
+                                    xhtml: Boolean,
+                                    urlArgs: Option[String],
+                                    scriptType: String,
+                                    skipDataMain: Boolean) {
       private[SbtRequire] def toMap(implicit logger: Logger): Map[String, _] =
         Map(
           "baseUrl" -> baseUrl,
           asMap("paths", paths),
           asMap("bundles", bundles),
-          asMap("shim", shim.map { case (k, v) => (k, v.toMap)}),
+          asMap("shim", shim.map { case (k, v) => (k, v.toMap) }),
           asMap("map", map.groupBy(_._1).toSeq.map { case (k, v) => (k, v.unzip._2.reduce(_ ++ _)) }),
           asMap("config", config),
-          asMap("packages", packages.map { case (k, v) => (k, v.toMap)}),
+          asMap("packages", packages.map { case (k, v) => (k, v.toMap) }),
           "nodeIdCompat" -> nodeIdCompat,
           "waitSeconds" -> waitSeconds,
           "context" -> context,
@@ -278,7 +280,7 @@ object SbtRequire
         new SimpleFileFilter({
           case file if file.isFile =>
             val path = file.getAbsolutePath.replace('\\', '/')
-            (false /: paths)(_ || path.contains(_))
+            (false /: paths) (_ || path.contains(_))
           case _ =>
             false
         })
