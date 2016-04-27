@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 ByTeGround, Inc
+ * Copyright © 2009-2016 Hydra Technologies, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.bootstrap
 
-import SbtRequire.autoImport._
-import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
+import io.noplay.sbt.SbtRequire
+import io.noplay.sbt.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
-object SbtTwitter
+object SbtBootstrap
   extends AutoPlugin {
   override val requires = SbtRequire
 
+  object autoImport {
+    val bootstrapVersion = settingKey[String]( "Bootstrap version" )
+  }
+
+  import SbtBootstrap.autoImport._
+
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "twitter" -> "//platform.twitter.com",
-    requireConfigurationShim ++= Seq(
-      "twitter" -> Shim.Config(
-        Seq(),
-        exports = Some("twttr")
-      )
-    )
+    requireConfigurationPaths += "bootstrap" -> s"/${webModulesLib.value}/bootstrap"
   )
 
-  override val projectSettings =
-    inConfig(Assets)(unscopedProjectSettings) ++
-      inConfig(TestAssets)(unscopedProjectSettings)
+  override val projectSettings = Seq(
+    bootstrapVersion := "3.3.5",
+    libraryDependencies += "org.webjars" % "bootstrap" % bootstrapVersion.value
+  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 ByTeGround, Inc
+ * Copyright © 2009-2016 Hydra Technologies, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.angular
 
-import SbtRequire.autoImport._
-import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import SbtRequire.autoImport.RequireConfiguration.Shim
 import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
+import io.noplay.sbt.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 

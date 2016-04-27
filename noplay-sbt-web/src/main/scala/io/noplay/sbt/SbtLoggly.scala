@@ -1,27 +1,13 @@
-/**
- * Copyright © 2009-2016 ByTeGround, Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.noplay.sbt
 
-import SbtRequire.autoImport._
-import com.byteground.sbt.SbtNpm.autoImport._
-import com.byteground.sbt.util.Javascript
+import io.alphard.sbt.SbtNpm
+import io.alphard.sbt.SbtNpm.autoImport._
+import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration
+import io.noplay.sbt.SbtRequire.autoImport._
+import io.alphard.sbt.util.Javascript
+import com.typesafe.sbt.web.Import.WebKeys
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
 import sbt._
 
 object SbtLoggly
@@ -67,7 +53,7 @@ object SbtLoggly
     webModuleGenerators <+= logglyWebModulesGenerator,
     requireConfigurationPaths += "loggly" -> s"/${webModulesLib.value}/${logglyLibraryName.value}/${logglyLibraryFileName.value}",
     requireConfigurationShim ++= Seq(
-      "loggly" -> Shim.Config(
+      "loggly" -> RequireConfiguration.Shim.Config(
         Seq("module"),
         exports = Some("_LTracker"),
         init = Some(
@@ -107,7 +93,7 @@ object SbtLoggly
                 |      return _consoleError.apply(this, arguments);
                 |    };
                 |  }
-                |  
+                |
                 |  if (sendRequireErrors) {
                 |    var _onError = requirejs.onError;
                 |    requirejs.onError = function (error) {

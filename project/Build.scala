@@ -10,7 +10,7 @@ object BuildDependencies {
   // CORE //
   //////////
 
-  val alphardSbtVersion = "3.28.0"
+  val alphardSbtVersion = "3.31.0"
   val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
 
   /////////
@@ -33,6 +33,7 @@ object BuildDependencies {
 
   val sbtSassVersion = "0.9.3"
   val sbtSass = "org.madoushi.sbt" % "sbt-sass" % sbtSassVersion
+
 }
 
 object Build
@@ -60,10 +61,6 @@ object Build
           val sbtBV = sbtBinaryVersion.value
           val scalaBV = scalaBinaryVersion.value
           Seq(
-            // web translate it
-            "org.json4s" %% "json4s-native" % "3.2.11",
-            "org.json4s" %% "json4s-jackson" % "3.2.11",
-            "org.joda" % "joda-convert" % "1.8",
             sbtPluginExtra(alphardSbtCore, sbtBV, scalaBV)
           )
         }

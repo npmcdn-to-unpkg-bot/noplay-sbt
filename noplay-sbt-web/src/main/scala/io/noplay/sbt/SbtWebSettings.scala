@@ -1,5 +1,5 @@
 /**
-  * Copyright © 2009-2016 ByTeGround, Inc
+  * Copyright © 2009-2016 Hydra Technologies, Inc
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -15,23 +15,17 @@
   */
 package io.noplay.sbt
 
-import com.typesafe.sbt.less.SbtLess
 import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb
-import io.alphard.sbt.{SbtWebBrowser, SbtWebServer}
+import io.alphard.sbt.{SbtWebIndex, SbtWebBrowser, SbtWebServer}
 import sbt.AutoPlugin
 
-object SbtNoPlayWeb
+object SbtWebSettings
   extends AutoPlugin {
   override lazy val requires =
     SbtWeb &&
+      SbtWebIndex &&
       SbtRequire &&
-      SbtJquery &&
-      SbtQ &&
-      SbtAngular &&
-      SbtBootstrap &&
-      SbtFontAwesome &&
-      SbtLess &&
       SbtRjs &&
       SbtWebServer &&
       SbtWebBrowser
