@@ -15,11 +15,12 @@
  */
 package io.noplay.sbt
 
-import com.byteground.sbt.SbtWebIndex.autoImport._
-import com.byteground.sbt.util.Javascript
 import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
+import io.alphard.sbt.SbtWebIndex
+import io.alphard.sbt.SbtWebIndex.autoImport._
+import io.alphard.sbt.util.Javascript
 import sbt.Keys._
 import sbt._
 
@@ -262,7 +263,7 @@ object SbtRequire
         }
         IO.write(
           mainFile,
-          util.FreeMarker.render(
+          io.alphard.sbt.util.FreeMarker.render(
             mainTemplate,
             Map(
               "configuration" -> configuration,
