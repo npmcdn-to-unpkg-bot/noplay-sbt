@@ -1,12 +1,12 @@
 /**
  * Copyright © 2009-2016 Hydra Technologies, Inc
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,10 +34,11 @@ object SbtAlphardWeb
       SbtQ &&
       SbtJquery
 
+  private val Organization = "io.alphard"
+  private val Name = "alphard-web"
+
   object autoImport {
-    val webUtilName = settingKey[String]("Alphard Web name")
-    val webUtilVersion = settingKey[String]("Alphard Web version")
-    val webUtilModule = settingKey[ModuleID]("Alphard Web module")
+    val alphardWebVersion = settingKey[String]("Alphard Web version")
 
     def alphardWebPath(name: String): Def.Setting[_] =
       alphardWebPath(name, None)
@@ -46,7 +47,7 @@ object SbtAlphardWeb
       alphardWebPath(name, Some(path))
 
     private def alphardWebPath(name: String, path: Option[String]): Def.Setting[_] =
-      requireConfigurationPaths += name -> s"/${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
+      requireConfigurationPaths += name -> s"/${webModulesLib.value}/$Name/${path.getOrElse(name)}"
   }
 
   import autoImport._
@@ -118,9 +119,7 @@ object SbtAlphardWeb
   )
 
   override val projectSettings = Seq(
-    webUtilName := "byteground-web-util",
-    webUtilVersion := "0.19.0",
-    webUtilModule := "com.byteground" % webUtilName.value % webUtilVersion.value,
-    libraryDependencies += webUtilModule.value
+    alphardWebVersion := "0.19.0",
+    libraryDependencies += Organization % Name % alphardWebVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
