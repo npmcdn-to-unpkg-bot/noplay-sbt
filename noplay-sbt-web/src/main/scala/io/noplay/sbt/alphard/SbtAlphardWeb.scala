@@ -119,7 +119,7 @@ object SbtAlphardWeb
   )
 
   override val projectSettings = Seq(
-    alphardWebVersion := "0.19.0",
+    alphardWebVersion := "0.18.0",
     libraryDependencies += Organization % Name % alphardWebVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
