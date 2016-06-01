@@ -57,10 +57,10 @@ object SbtAngularTranslate
   )
 
   override val projectSettings = Seq(
-    angularTranslateVersion := "2.7.0",
+    angularTranslateVersion := "2.11.0",
     libraryDependencies ++= Seq(
-      "org.webjars" % "angular-translate" % angularTranslateVersion.value,
-      "org.webjars" % "angular-translate-loader-partial" % angularTranslateVersion.value
+      "org.webjars.bower" % "angular-translate" % angularTranslateVersion.value,
+      "org.webjars.bower" % "angular-translate-loader-partial" % angularTranslateVersion.value
     )
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
