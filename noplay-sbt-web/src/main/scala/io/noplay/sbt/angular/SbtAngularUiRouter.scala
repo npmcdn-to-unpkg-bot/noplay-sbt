@@ -56,7 +56,7 @@ object SbtAngularUiRouter
   )
 
   override val projectSettings = Seq(
-    angularUiRouterVersion := "0.2.15",
-    libraryDependencies += "org.webjars" % "angular-ui-router" % angularUiRouterVersion.value
+    angularUiRouterVersion := "0.3.0",
+    libraryDependencies += "org.webjars.bower" % "angular-ui-router" % angularUiRouterVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
