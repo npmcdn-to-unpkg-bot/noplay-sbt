@@ -26,7 +26,7 @@ import sbt._
 
 import scala.language.existentials
 
-object SbtByTeGroundWebUtil
+object SbtWebUtil
   extends AutoPlugin {
   override val requires =
     SbtAngular &&
