@@ -36,7 +36,7 @@ object SbtAngularGoogleMaps
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths ++= Seq(
-      "angular-google-maps" -> s"/${webModulesLib.value}/angular-google-maps/angular-google-maps"
+      "angular-google-maps" -> s"/${webModulesLib.value}/angular-google-maps/dist/angular-google-maps"
     ),
     requireConfigurationShim +=
       "angular-google-maps" -> Shim.Config(

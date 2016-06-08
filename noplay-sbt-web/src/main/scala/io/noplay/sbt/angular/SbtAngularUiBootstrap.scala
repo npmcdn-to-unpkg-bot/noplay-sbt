@@ -50,7 +50,7 @@ object SbtAngularUiBootstrap
   )
 
   override val projectSettings = Seq(
-    angularUiBootstrapVersion := "1.3.2",
-    libraryDependencies += "org.webjars.bower" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
+    angularUiBootstrapVersion := "1.3.3",
+    libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
