@@ -120,6 +120,8 @@ object SbtRequire
     }
 
     val requireVersion = settingKey[String]("The web jars require js version")
+    val requireMinified = settingKey[Boolean]("The web jars require js minified")
+    val requireCDN = settingKey[Boolean]("The web jars require js CDN")
     val requirePath = settingKey[String]("The web jars require js path")
     val requireConfigurationBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
     val requireConfigurationPaths = settingKey[RequireConfiguration.Paths](
@@ -137,7 +139,7 @@ object SbtRequire
     val requireConfigurationMap = settingKey[RequireConfiguration._Map](
       """For the given module prefix, instead of loading the module
         |with the given ID, substitute a different module ID
-        | """.stripMargin
+      """.stripMargin
     )
     val requireConfigurationConfig = settingKey[RequireConfiguration.Config](
       """There is a common need to pass configuration info to a module.
@@ -305,8 +307,19 @@ object SbtRequire
   override val projectSettings =
     inConfig(Assets)(unscopedProjectSettings) ++
       inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
-      requireVersion := "2.1.15",
-      requirePath := "/" + webModulesLib.value + "/requirejs/require.js",
-      libraryDependencies += "org.webjars" % "requirejs" % requireVersion.value
+      requireVersion := "2.2.0",
+      requireMinified := true,
+      requireCDN := true,
+      requirePath := {
+        val prefix = if (requireCDN.value)
+          s"/${webModulesLib.value}/requirejs/require"
+            else
+          s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
+        val suffix = s"${if (requireMinified.value) ".min" else ""}.js"
+        prefix + suffix
+      },
+      libraryDependencies ++= Seq(
+        "org.webjars" % "requirejs" % requireVersion.value
+      )
     )
 }
