@@ -88,10 +88,10 @@ object SbtWebIndex
     lazy val webIndexScripts = settingKey[Seq[Script]]("The scripts to be downloaded from the page")
     lazy val webIndexHtmlAttributes = settingKey[Seq[(String, String)]]("The extra html tag attributes")
     lazy val webIndexHeadFile = settingKey[File]("The extra head file tag elements")
-    lazy val webIndexHead = settingKey[String]("The extra head tag elements")
+    lazy val webIndexHead = taskKey[String]("The extra head tag elements")
     lazy val webIndexHeadAttributes = settingKey[Seq[(String, String)]]("The extra head tag attributes")
     lazy val webIndexBodyFile = settingKey[File]("The body file. If present it is used to generate the body content")
-    lazy val webIndexBody = settingKey[String]("The body content")
+    lazy val webIndexBody = taskKey[String]("The body content")
     lazy val webIndexBodyAttributes = settingKey[Seq[(String, String)]]("The extra body attributes")
     lazy val webIndexStage = taskKey[Stage]("The pipeline stage that generates the index page")
   }
