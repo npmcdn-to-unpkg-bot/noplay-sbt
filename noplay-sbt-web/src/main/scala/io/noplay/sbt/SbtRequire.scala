@@ -26,7 +26,7 @@ import sbt._
 object SbtRequire
   extends AutoPlugin {
 
-  private val DefaultRequireMainTemplate = "/io/byteground/sbt/requirejs.js.ftl"
+  private val DefaultRequireMainTemplate = "/io/noplay/sbt/requirejs.js.ftl"
 
   override val requires = SbtWebIndex && SbtRjs
 
