@@ -35,11 +35,11 @@ object SbtJquery
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/jquery",
-    requireConfigurationShim += "jquery" -> Shim.Config( exports = Some( "jQuery" ) )
+    requireConfigurationShim += "jquery" -> Shim.Config( exports = Some( "$" ) )
   )
 
   override val projectSettings = Seq(
-    jqueryVersion := "2.1.1",
+    jqueryVersion := "3.0.0",
     libraryDependencies += "org.webjars" % "jquery" % jqueryVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

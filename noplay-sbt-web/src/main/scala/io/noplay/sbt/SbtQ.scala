@@ -36,7 +36,7 @@ object SbtQ
   )
 
   override val projectSettings = Seq(
-    qVersion := "1.0.1",
+    qVersion := "2.0.0",
     libraryDependencies += "org.webjars" % "q" % qVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }
