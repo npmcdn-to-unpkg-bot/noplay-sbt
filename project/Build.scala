@@ -25,7 +25,7 @@ object BuildDependencies {
 
   val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
 
-  val sbtRjsVersion = "1.0.7"
+  val sbtRjsVersion = "1.0.9-SNAPSHOT"
   val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
 
   val sbtLessVersion = "1.1.1"

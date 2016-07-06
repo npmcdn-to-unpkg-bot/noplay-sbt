@@ -15,6 +15,9 @@
  */
 package io.noplay.sbt
 
+import java.io.File
+
+import com.typesafe.sbt.rjs.Import._
 import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
@@ -35,6 +38,11 @@ object SbtRequire
     object RequireModule {
       type Id = String
       type Path = String
+      object Path {
+        def minify(path: String, minified: Boolean = false) = path + (if (minified) ".min" else "")
+        def filename(path: String, extension: String = "js"): String = path + "." + extension
+        def relativize(path: String): String = if (path.startsWith("/")) path.substring(1) else path
+      }
     }
 
     case class RequirePackage(name: String, main: String) {
@@ -119,10 +127,6 @@ object SbtRequire
       }
     }
 
-    val requireVersion = settingKey[String]("The web jars require js version")
-    val requireMinified = settingKey[Boolean]("The web jars require js minified")
-    val requireCDN = settingKey[Boolean]("The web jars require js CDN")
-    val requirePath = settingKey[String]("The web jars require js path")
     val requireConfigurationBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
     val requireConfigurationPaths = settingKey[RequireConfiguration.Paths](
       "The path mappings for module names not found directly under baseUrl"
@@ -201,18 +205,26 @@ object SbtRequire
       """.stripMargin
     )
     val requireConfiguration = settingKey[RequireConfiguration]("The full configuration object")
+    val requireVersion = settingKey[String]("The require js version")
+    val requireMinified = settingKey[Boolean]("If true the minified versions of modules in paths are used")
+    val requireCDN = settingKey[Boolean]("If true the CDN versions of modules in paths are used")
+    val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
+    val requirePath = settingKey[String]("The web jars require js path")
     val requireDirectory = settingKey[File]("The main file directory")
-    val requireMainName = settingKey[String]("The main file name")
-    val requireMainModuleId = settingKey[RequireModule.Id]("The main module id")
+    val requireMainModule = settingKey[String]("The main module name")
+    val requireMainPath = settingKey[String]("The main file path")
     val requireMainTemplateFile = settingKey[Option[File]]("The main template file")
     val requireMainFile = settingKey[File]("The main file")
     val requireMainGenerator = taskKey[Seq[File]]("Generate the config file")
     val requireIncludeFilter = settingKey[FileFilter]("The include filter generated from paths")
     val requireExcludeFilter = settingKey[FileFilter]("The exclude filter generated from paths")
+    val requireCallbackModule = settingKey[RequireModule.Id]("The callback module name")
 
     lazy val unscopedProjectSettings = Seq(
       requireConfigurationBaseUrl := None,
-      requireConfigurationPaths := Nil,
+      requireConfigurationPaths := Seq(
+        requireMainModule.value -> RequireModule.Path.minify(requireMainModule.value, requireMinified.value)
+      ),
       requireConfigurationBundles := Nil,
       requireConfigurationShim := Nil,
       requireConfigurationMap := Nil,
@@ -223,7 +235,7 @@ object SbtRequire
       requireConfigurationContext := None,
       requireConfigurationDeps := Nil,
       requireConfigurationCallback := Some(Javascript.Function(
-        s"""function() { require(['${requireMainModuleId.value}']); }""")
+        s"""function() { require(['${requireCallbackModule.value}']); }""")
       ),
       requireConfigurationEnforceDefine := false,
       requireConfigurationXhtml := false,
@@ -249,14 +261,25 @@ object SbtRequire
         requireConfigurationScriptType.value,
         requireConfigurationSkipDataMain.value
       ),
+      requireMinified := true,
+      requireCDN := true,
+      requireOptimized := true,
       requireDirectory := sourceManaged.value / "require-js",
-      requireMainName := "main.js",
+      requirePath := {
+        val path = if (requireCDN.value)
+          s"/${webModulesLib.value}/requirejs/require"
+        else
+          s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
+        RequireModule.Path.filename(RequireModule.Path.minify(path, requireMinified.value))
+      },
+      requireMainModule := "main",
+      requireMainPath := RequireModule.Path.minify(requireConfigurationBaseUrl.value.getOrElse("") + "/" + requireMainModule.value, requireMinified.value),
       requireMainTemplateFile := None,
-      requireMainFile := requireDirectory.value / requireMainName.value,
+      requireMainFile := requireDirectory.value / RequireModule.Path.filename(RequireModule.Path.relativize(requireMainPath.value)),
       requireMainGenerator := {
         implicit val logger = streams.value.log
         val configuration = Javascript.toJs(requireConfiguration.value.toMap)
-        val moduleId = requireMainModuleId.value
+        val moduleId = requireCallbackModule.value
         val mainTemplate = requireMainTemplateFile.value.map(IO.read(_)) getOrElse {
           IO.readStream(getClass.getResource(DefaultRequireMainTemplate).openStream())
         }
@@ -296,11 +319,26 @@ object SbtRequire
         SbtWebIndex.autoImport.Script(
           requirePath.value,
           async = true,
-          attributes = Map("data-main" -> requireMainName.value)
+          attributes = Map("data-main" -> RequireModule.Path.filename(requireMainPath.value))
         )
       )
     )
   }
+
+  import autoImport._
+
+  val rjsSettings = Seq(
+    RjsKeys.baseUrl := (requireConfigurationBaseUrl in Assets).value.map(RequireModule.Path.relativize).getOrElse("."),
+    RjsKeys.mainConfig := RequireModule.Path.minify((requireMainModule in Assets).value, (requireMinified in Assets).value),
+    RjsKeys.mainConfigFile := new File(RequireModule.Path.relativize(s"${RjsKeys.baseUrl.value}/${RequireModule.Path.filename(RjsKeys.mainConfig.value)}")),
+    /*RjsKeys.webJarCdns ++= Map(
+      "org.webjars" -> "//cdn.jsdelivr.net/webjars/{name}/{revision}/{path}",
+      "org.webjars.npm" -> "//npmcdn.com/{name}@{revision}/{path}",
+      "org.webjars.bower" -> "//bowercdn.net/c/{name}-{revision}/{path}"
+    ),
+    RjsKeys.paths := getWebJarPaths.value,*/
+    pipelineStages ++= (if ((requireOptimized in Assets).value) Seq(rjs) else Nil)
+  )
 
   import SbtRequire.autoImport._
 
@@ -308,18 +346,56 @@ object SbtRequire
     inConfig(Assets)(unscopedProjectSettings) ++
       inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
       requireVersion := "2.2.0",
-      requireMinified := true,
-      requireCDN := true,
-      requirePath := {
-        val prefix = if (requireCDN.value)
-          s"/${webModulesLib.value}/requirejs/require"
-            else
-          s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
-        val suffix = s"${if (requireMinified.value) ".min" else ""}.js"
-        prefix + suffix
-      },
       libraryDependencies ++= Seq(
         "org.webjars" % "requirejs" % requireVersion.value
       )
-    )
+    ) ++ rjsSettings
+
+  // TODO: MOVE THIS TO SbtRjs
+//  private def getWebJarPaths: Def.Initialize[Task[Map[String, (String, String)]]] = Def.task {
+//    import RjsKeys._
+//
+//    val Utf8 = Charset.forName("UTF-8")
+//
+//    def unixPath(p: String): String = p.replace("\\","/")
+//
+//    def withSep(p: String): String = if (p.endsWith(java.io.File.separator)) p else p + java.io.File.separator
+//
+//    def allDependencies(updateReport: UpdateReport): Seq[ModuleID] = {
+//      updateReport.filter(
+//        configurationFilter(Compile.name) && artifactFilter(`type` = "jar")
+//      ).toSeq.map(_._2).distinct
+//    }
+//
+//    val maybeMainConfigFile = (mappings in Assets).value.find(_._2 == mainConfigFile.value.getPath).map(_._1)
+//    maybeMainConfigFile.fold(Map[String, (String, String)]()) { f =>
+//      val lib = unixPath(withSep(webModulesLib.value))
+//      val config = IO.read(f, Utf8)
+//      val pathModuleMappings = SortedMap(
+//        s"""['"]?([^\\s'"]*)['"]?\\s*:\\s*[\\[]?.*['"].*/$lib(.*)['"]""".r
+//          .findAllIn(config)
+//          .matchData.map(m => m.subgroups(1) -> m.subgroups.head)
+//          .toIndexedSeq
+//          : _*
+//      )
+//      val webJarLocalPathPrefix = withSep((webJarsDirectory in Assets).value.getPath) + lib
+//      val webJarRelPaths = (webJars in Assets).value.map(f => unixPath(f.getPath.drop(webJarLocalPathPrefix.length))).toSet
+//      def minifiedModulePath(p: String): String = {
+//        def ifExists(p: String): Option[String] = if (webJarRelPaths.contains(p + ".js")) Some(p) else None
+//        ifExists(p + ".min").orElse(ifExists(p + "-min")).getOrElse(p)
+//      }
+//      val webJarCdnPaths = for {
+//        m <- allDependencies(update.value)
+//        cdnPattern <- webJarCdns.value.get(m.organization)
+//      } yield for {
+//        pm <- pathModuleMappings.from(m.name + "/") if pm._1.startsWith(m.name + "/")
+//      } yield {
+//        val (moduleIdPath, moduleId) = pm
+//        val moduleIdRelPath = minifiedModulePath(moduleIdPath).drop(m.name.length + 1)
+//        val cdnPath = cdnPattern.replace("{name}", m.name).replace("{revision}", m.revision).replace("{path}", moduleIdRelPath)
+//        moduleId -> (lib + moduleIdPath, cdnPath)
+//      }
+//      webJarCdnPaths.flatten.toMap
+//    }
+//  }
 }
