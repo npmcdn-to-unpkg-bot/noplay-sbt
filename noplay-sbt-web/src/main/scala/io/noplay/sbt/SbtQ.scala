@@ -18,6 +18,7 @@ package io.noplay.sbt
 import SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
+import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
 import sbt.Keys._
 import sbt._
 
@@ -32,11 +33,12 @@ object SbtQ
   import SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q"
+    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q",
+    requireConfigurationShim += "q" -> Shim.Config(exports = Some("Q"))
   )
 
   override val projectSettings = Seq(
-    qVersion := "2.0.0",
-    libraryDependencies += "org.webjars" % "q" % qVersion.value
+    qVersion := "1.4.1",
+    libraryDependencies += "org.webjars.npm" % "q" % qVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

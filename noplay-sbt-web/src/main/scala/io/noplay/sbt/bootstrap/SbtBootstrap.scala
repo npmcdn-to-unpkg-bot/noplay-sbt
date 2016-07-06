@@ -37,7 +37,7 @@ object SbtBootstrap
   )
 
   override val projectSettings = Seq(
-    bootstrapVersion := "3.3.5",
+    bootstrapVersion := "4.0.0-alpha.2",
     libraryDependencies += "org.webjars" % "bootstrap" % bootstrapVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

@@ -36,11 +36,8 @@ object SbtAngular
   import SbtAngular.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths +=
-      "angular" -> s"/${webModulesLib.value}/angularjs/angular"
-    ,
-    requireConfigurationShim +=
-      "angular" -> Shim.Config(exports = Some("angular"))
+    requireConfigurationPaths += "angular" -> s"/${webModulesLib.value}/angularjs/angular",
+    requireConfigurationShim += "angular" -> Shim.Config(exports = Some("angular"))
   ) ++
     angularModule("animate", "ngAnimate") ++
     angularModule("aria", "ngAria") ++
@@ -77,6 +74,6 @@ object SbtAngular
 
   override lazy val projectSettings = Seq(
     angularVersion := "1.5.5",
-    libraryDependencies += "org.webjars.bower" % "angularjs" % angularVersion.value
+    libraryDependencies += "org.webjars.npm" % "angularjs" % angularVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }
