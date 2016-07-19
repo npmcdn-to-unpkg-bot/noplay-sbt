@@ -30,53 +30,66 @@ object SbtAngular
   override val requires = SbtRequire
 
   object autoImport {
-    val angularVersion = settingKey[String]("Angular version")
+    val angularVersion = settingKey[String]("AngularJS version")
   }
 
   import SbtAngular.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths +=
-      "angular" -> s"/${webModulesLib.value}/angularjs/angular"
-    ,
-    requireConfigurationShim +=
-      "angular" -> Shim.Config(exports = Some("angular"))
-  ) ++
-    angularModule("animate", "ngAnimate") ++
-    angularModule("aria", "ngAria") ++
-    angularModule("cookies", "ngCookies") ++
-    angularModule("loader", "ngLoader") ++
-    angularModule("message-format", "ngMessageFormat") ++
-    angularModule("messages", "ngMessages") ++
-    angularModule("mocks", "ngMocks") ++
-    angularModule("resource", "ngResource") ++
-    angularModule("route", "ngRoute") ++
-    angularModule("sanitize", "ngSanitize") ++
-    angularModule("scenario", "ngScenario") ++
-    angularModule("touch", "ngTouch")
+    requireConfigurationPaths += "angular" -> path(webModulesLib.value, "angular"),
+    requireConfigurationShim += "angular" -> Shim.Config(exports = Some("angular"))
+  )
 
-  def angularModule(name: String, moduleName: String) = {
-    val fullName = s"angular-$name"
-    Seq(
+  override lazy val projectSettings = Seq(
+    angularVersion := "1.5.7",
+    libraryDependencies += module("angular", angularVersion.value)
+  ) ++
+    inConfig(Assets)(unscopedProjectSettings) ++
+    inConfig(TestAssets)(unscopedProjectSettings) ++
+    angularSettings("animate") ++
+    angularSettings("aria") ++
+    angularSettings("cookies") ++
+    //module("loader") ++
+    //module("message-format") ++
+    angularSettings("messages") ++
+    angularSettings("mocks") ++
+    angularSettings("resource") ++
+    angularSettings("route") ++
+    angularSettings("sanitize") //++
+  //module("scenario") ++
+  //module("touch")
+
+  private def dashToCamelcase(name: String) =
+    "-([a-z\\d])".r.replaceAllIn(name, { m => m.group(1).toUpperCase() })
+
+  private def angularSettings(suffix: String = "") = {
+    val name = "angular-" + suffix
+    val angularName = dashToCamelcase("ng-" + suffix)
+    val unscopedSettings = Seq(
       requireConfigurationPaths +=
-        fullName -> s"/${webModulesLib.value}/angularjs/$fullName",
+        name -> path(webModulesLib.value, name),
       requireConfigurationShim +=
-        fullName -> RequireConfiguration.Shim.Config(
+        name -> RequireConfiguration.Shim.Config(
           Seq("angular"),
           init = Some(
             Javascript.Function(
               s"""function(angular) {
-                  |  return angular.module("$moduleName");
+                  |  return angular.module('$angularName');
                   |}
           """.stripMargin
             )
           )
         )
     )
+
+    Seq(
+      libraryDependencies += module(name, angularVersion.value)
+    ) ++
+      inConfig(Assets)(unscopedSettings) ++
+      inConfig(TestAssets)(unscopedSettings)
   }
 
-  override lazy val projectSettings = Seq(
-    angularVersion := "1.5.5",
-    libraryDependencies += "org.webjars.bower" % "angularjs" % angularVersion.value
-  ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
+  private def module(name: String, version: String) = "org.webjars.npm" % name % version
+
+  private def path(libPath: String, name: String) = s"/$libPath/$name/$name"
 }

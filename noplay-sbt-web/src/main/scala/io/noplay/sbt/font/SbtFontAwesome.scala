@@ -37,7 +37,7 @@ object SbtFontAwesome
   )
 
   override lazy val projectSettings = Seq(
-    fontAwesomeVersion := "4.5.0",
+    fontAwesomeVersion := "4.6.3",
     libraryDependencies += "org.webjars" % "font-awesome" % fontAwesomeVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

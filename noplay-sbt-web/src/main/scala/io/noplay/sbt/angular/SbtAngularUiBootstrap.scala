@@ -35,7 +35,7 @@ object SbtAngularUiBootstrap
   import SbtAngularUiBootstrap.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular-ui-bootstrap" -> s"/${webModulesLib.value}/angular-ui-bootstrap/ui-bootstrap-tpls",
+    requireConfigurationPaths += "angular-ui-bootstrap" -> s"/${webModulesLib.value}/angular-ui-bootstrap/dist/ui-bootstrap-tpls",
     requireConfigurationShim += "angular-ui-bootstrap" -> Shim.Config(
       Seq("angular"),
       init = Some(
@@ -51,6 +51,6 @@ object SbtAngularUiBootstrap
 
   override val projectSettings = Seq(
     angularUiBootstrapVersion := "1.3.3",
-    libraryDependencies += "org.webjars" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
+    libraryDependencies += "org.webjars.npm" % "angular-ui-bootstrap" % angularUiBootstrapVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }

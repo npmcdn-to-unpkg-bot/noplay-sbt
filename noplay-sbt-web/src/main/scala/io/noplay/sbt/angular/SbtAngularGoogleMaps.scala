@@ -67,9 +67,9 @@ object SbtAngularGoogleMaps
   )
 
   override lazy val projectSettings = Seq(
-    angularGoogleMapsVersion := "2.1.1",
+    angularGoogleMapsVersion := "2.3.3",
     libraryDependencies ++= Seq(
-      "org.webjars.bower" % "angular-google-maps" % angularGoogleMapsVersion.value exclude("org.webjars", "lodash")
+      "org.webjars.npm" % "angular-google-maps" % angularGoogleMapsVersion.value exclude("org.webjars.npm", "lodash")
     )
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }

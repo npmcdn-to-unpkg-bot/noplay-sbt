@@ -53,7 +53,7 @@ object SbtAngularMaterial
 
   override val projectSettings = Seq(
     angularMaterialVersion := "1.0.9",
-    libraryDependencies += "org.webjars.bower" % "angular-material" % angularMaterialVersion.value
+    libraryDependencies += "org.webjars.npm" % "angular-material" % angularMaterialVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 
 }

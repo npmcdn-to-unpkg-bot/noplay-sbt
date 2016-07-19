@@ -39,8 +39,8 @@ object SbtLodash
   )
 
   override val projectSettings = Seq(
-    lodashVersion := "3.3.1",
-    libraryDependencies += "org.webjars" % "lodash" % lodashVersion.value
+    lodashVersion := "4.13.1",
+    libraryDependencies += "org.webjars.npm" % "lodash" % lodashVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 
 }
