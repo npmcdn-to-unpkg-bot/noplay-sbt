@@ -15,7 +15,6 @@
  */
 package io.noplay.sbt
 
-import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb
 import io.alphard.sbt.{SbtWebBrowser, SbtWebServer}
 import sbt.AutoPlugin
@@ -26,7 +25,6 @@ object SbtWebSettings
     SbtWeb &&
       SbtWebIndex &&
       SbtRequire &&
-      SbtRjs &&
       SbtWebServer &&
       SbtWebBrowser
 }

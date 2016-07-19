@@ -35,8 +35,14 @@ object SbtAngularTranslate
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths ++= Seq(
-      "angular-translate" -> s"/${webModulesLib.value}/angular-translate/angular-translate",
-      "angular-translate-loader-partial" -> s"/${webModulesLib.value}/angular-translate-loader-partial/angular-translate-loader-partial"
+      "angular-translate" -> s"/${webModulesLib.value}/angular-translate/dist/angular-translate",
+      path(webModulesLib.value, "handler-log"),
+      path(webModulesLib.value, "interpolation-messageformat"),
+      path(webModulesLib.value, "loader-partial"),
+      path(webModulesLib.value, "loader-static-files"),
+      path(webModulesLib.value, "loader-url"),
+      path(webModulesLib.value, "storage-cookie"),
+      path(webModulesLib.value, "storage-local")
     ),
     requireConfigurationShim ++= Seq(
       "angular-translate" -> Shim.Config(
@@ -50,17 +56,23 @@ object SbtAngularTranslate
           )
         )
       ),
-      "angular-translate-loader-partial" -> RequireConfiguration.Shim.Config(
-        Seq("angular-translate")
-      )
+      "angular-translate-handler-log" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-interpolation-messageformat" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-loader-partial" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-loader-static-files" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-loader-url" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-storage-cookie" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
+      "angular-translate-storage-local" -> RequireConfiguration.Shim.Config(Seq("angular-translate"))
     )
   )
 
   override val projectSettings = Seq(
     angularTranslateVersion := "2.11.0",
     libraryDependencies ++= Seq(
-      "org.webjars.npm" % "angular-translate" % angularTranslateVersion.value,
-      "org.webjars.npm" % "angular-translate-loader-partial" % angularTranslateVersion.value
+      "org.webjars.npm" % "angular-translate" % angularTranslateVersion.value
     )
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
+
+  private def path(libPath: String, suffix: String) =
+    s"angular-translate-$suffix" -> s"/$libPath/angular-translate/dist/angular-translate-$suffix/angular-translate-$suffix"
 }

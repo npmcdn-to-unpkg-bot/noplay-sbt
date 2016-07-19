@@ -1,5 +1,5 @@
-import io.noplay.sbt.SbtCommunitySettings.autoImport._
 import io.alphard.sbt._
+import io.noplay.sbt.SbtCommunitySettings.autoImport._
 import sbt.Defaults._
 import sbt.Keys._
 import sbt._
@@ -10,7 +10,7 @@ object BuildDependencies {
   // CORE //
   //////////
 
-  val alphardSbtVersion = "3.31.0"
+  val alphardSbtVersion = "3.34.0"
   val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
 
   /////////
@@ -25,8 +25,8 @@ object BuildDependencies {
 
   val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
 
-  val sbtRjsVersion = "1.0.9-SNAPSHOT"
-  val sbtRjs = "com.typesafe.sbt" %% "sbt-rjs" % sbtRjsVersion
+  var rjsVersion = "2.2.0"
+  var rjs = "org.webjars" % "rjs" % rjsVersion
 
   val sbtLessVersion = "1.1.1"
   val sbtLess = "com.typesafe.sbt" %% "sbt-less" % sbtLessVersion
@@ -86,8 +86,8 @@ object Build
           val sbtBV = sbtBinaryVersion.value
           val scalaBV = scalaBinaryVersion.value
           Seq(
+            rjs,
             sbtPluginExtra(alphardSbtWeb, sbtBV, scalaBV),
-            sbtPluginExtra(sbtRjs, sbtBV, scalaBV),
             sbtPluginExtra(sbtLess, sbtBV, scalaBV),
             sbtPluginExtra(sbtSass, sbtBV, scalaBV)
           )

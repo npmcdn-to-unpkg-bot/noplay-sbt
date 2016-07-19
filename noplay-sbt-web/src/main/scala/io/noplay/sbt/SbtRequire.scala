@@ -17,12 +17,11 @@ package io.noplay.sbt
 
 import java.io.File
 
-import com.typesafe.sbt.rjs.Import._
-import com.typesafe.sbt.rjs.SbtRjs
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
 import io.alphard.sbt.util.Javascript
 import io.noplay.sbt.SbtWebIndex.autoImport._
+import io.noplay.sbt.SbtRjs.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -267,9 +266,9 @@ object SbtRequire
       requireDirectory := sourceManaged.value / "require-js",
       requirePath := {
         val path = if (requireCDN.value)
-          s"/${webModulesLib.value}/requirejs/require"
-        else
           s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
+        else
+          s"/${webModulesLib.value}/requirejs/require"
         RequireModule.Path.filename(RequireModule.Path.minify(path, requireMinified.value))
       },
       requireMainModule := "main",
@@ -331,12 +330,6 @@ object SbtRequire
     RjsKeys.baseUrl := (requireConfigurationBaseUrl in Assets).value.map(RequireModule.Path.relativize).getOrElse("."),
     RjsKeys.mainConfig := RequireModule.Path.minify((requireMainModule in Assets).value, (requireMinified in Assets).value),
     RjsKeys.mainConfigFile := new File(RequireModule.Path.relativize(s"${RjsKeys.baseUrl.value}/${RequireModule.Path.filename(RjsKeys.mainConfig.value)}")),
-    /*RjsKeys.webJarCdns ++= Map(
-      "org.webjars" -> "//cdn.jsdelivr.net/webjars/{name}/{revision}/{path}",
-      "org.webjars.npm" -> "//npmcdn.com/{name}@{revision}/{path}",
-      "org.webjars.bower" -> "//bowercdn.net/c/{name}-{revision}/{path}"
-    ),
-    RjsKeys.paths := getWebJarPaths.value,*/
     pipelineStages ++= (if ((requireOptimized in Assets).value) Seq(rjs) else Nil)
   )
 
@@ -350,52 +343,4 @@ object SbtRequire
         "org.webjars" % "requirejs" % requireVersion.value
       )
     ) ++ rjsSettings
-
-  // TODO: MOVE THIS TO SbtRjs
-//  private def getWebJarPaths: Def.Initialize[Task[Map[String, (String, String)]]] = Def.task {
-//    import RjsKeys._
-//
-//    val Utf8 = Charset.forName("UTF-8")
-//
-//    def unixPath(p: String): String = p.replace("\\","/")
-//
-//    def withSep(p: String): String = if (p.endsWith(java.io.File.separator)) p else p + java.io.File.separator
-//
-//    def allDependencies(updateReport: UpdateReport): Seq[ModuleID] = {
-//      updateReport.filter(
-//        configurationFilter(Compile.name) && artifactFilter(`type` = "jar")
-//      ).toSeq.map(_._2).distinct
-//    }
-//
-//    val maybeMainConfigFile = (mappings in Assets).value.find(_._2 == mainConfigFile.value.getPath).map(_._1)
-//    maybeMainConfigFile.fold(Map[String, (String, String)]()) { f =>
-//      val lib = unixPath(withSep(webModulesLib.value))
-//      val config = IO.read(f, Utf8)
-//      val pathModuleMappings = SortedMap(
-//        s"""['"]?([^\\s'"]*)['"]?\\s*:\\s*[\\[]?.*['"].*/$lib(.*)['"]""".r
-//          .findAllIn(config)
-//          .matchData.map(m => m.subgroups(1) -> m.subgroups.head)
-//          .toIndexedSeq
-//          : _*
-//      )
-//      val webJarLocalPathPrefix = withSep((webJarsDirectory in Assets).value.getPath) + lib
-//      val webJarRelPaths = (webJars in Assets).value.map(f => unixPath(f.getPath.drop(webJarLocalPathPrefix.length))).toSet
-//      def minifiedModulePath(p: String): String = {
-//        def ifExists(p: String): Option[String] = if (webJarRelPaths.contains(p + ".js")) Some(p) else None
-//        ifExists(p + ".min").orElse(ifExists(p + "-min")).getOrElse(p)
-//      }
-//      val webJarCdnPaths = for {
-//        m <- allDependencies(update.value)
-//        cdnPattern <- webJarCdns.value.get(m.organization)
-//      } yield for {
-//        pm <- pathModuleMappings.from(m.name + "/") if pm._1.startsWith(m.name + "/")
-//      } yield {
-//        val (moduleIdPath, moduleId) = pm
-//        val moduleIdRelPath = minifiedModulePath(moduleIdPath).drop(m.name.length + 1)
-//        val cdnPath = cdnPattern.replace("{name}", m.name).replace("{revision}", m.revision).replace("{path}", moduleIdRelPath)
-//        moduleId -> (lib + moduleIdPath, cdnPath)
-//      }
-//      webJarCdnPaths.flatten.toMap
-//    }
-//  }
 }
