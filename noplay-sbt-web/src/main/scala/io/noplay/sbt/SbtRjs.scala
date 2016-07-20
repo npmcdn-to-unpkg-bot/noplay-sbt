@@ -15,6 +15,8 @@
  */
 package io.noplay.sbt
 
+import io.alphard.sbt.SbtNpm
+import io.alphard.sbt.SbtNpm.autoImport._
 import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.web.SbtWeb
@@ -28,7 +30,7 @@ import java.io.{InputStreamReader, BufferedReader}
 object SbtRjs
   extends AutoPlugin {
 
-  override def requires = SbtJsTask
+  override def requires = SbtJsTask && SbtNpm
 
   override def trigger = AllRequirements
 
@@ -36,6 +38,7 @@ object SbtRjs
     val rjs = TaskKey[Pipeline.Stage]("rjs", "Perform RequireJs optimization on the asset pipeline.")
 
     object RjsKeys {
+      val version = SettingKey[String]("rjs-version", "The rjs version")
       val appBuildProfile = TaskKey[JS.Object]("rjs-app-build-profile", "The project build profile contents.")
       val appDir = SettingKey[File]("rjs-app-dir", "The top level directory that contains your app js files. In effect, this is the source folder that rjs reads from.")
       val baseUrl = TaskKey[String]("rjs-base-url", """The dir relative to the source assets or public folder where js files are housed. Will default to "js", "javascripts" or "." with the latter if the other two cannot be found.""")
@@ -71,6 +74,8 @@ object SbtRjs
   import RjsKeys._
 
   override def projectSettings = Seq(
+    RjsKeys.version := "2.2.0",
+    npmDevDependencies += "requirejs" -> RjsKeys.version.value,
     appBuildProfile := getAppBuildProfile.value,
     appDir := (resourceManaged in rjs).value / "appdir",
     baseUrl := getBaseUrl.value,

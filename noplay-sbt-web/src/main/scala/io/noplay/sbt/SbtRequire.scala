@@ -327,6 +327,7 @@ object SbtRequire
   import autoImport._
 
   val rjsSettings = Seq(
+    RjsKeys.version := requireVersion.value,
     RjsKeys.baseUrl := (requireConfigurationBaseUrl in Assets).value.map(RequireModule.Path.relativize).getOrElse("."),
     RjsKeys.mainConfig := RequireModule.Path.minify((requireMainModule in Assets).value, (requireMinified in Assets).value),
     RjsKeys.mainConfigFile := new File(RequireModule.Path.relativize(s"${RjsKeys.baseUrl.value}/${RequireModule.Path.filename(RjsKeys.mainConfig.value)}")),

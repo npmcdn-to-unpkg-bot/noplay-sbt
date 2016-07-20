@@ -10,7 +10,7 @@ object BuildDependencies {
   // CORE //
   //////////
 
-  val alphardSbtVersion = "3.34.0"
+  val alphardSbtVersion = "3.35.0"
   val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
 
   /////////
@@ -24,15 +24,6 @@ object BuildDependencies {
   /////////
 
   val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
-
-  var rjsVersion = "2.2.0"
-  var rjs = "org.webjars" % "rjs" % rjsVersion
-
-  val sbtLessVersion = "1.1.1"
-  val sbtLess = "com.typesafe.sbt" %% "sbt-less" % sbtLessVersion
-
-  val sbtSassVersion = "0.9.3"
-  val sbtSass = "org.madoushi.sbt" % "sbt-sass" % sbtSassVersion
 
 }
 
@@ -86,10 +77,7 @@ object Build
           val sbtBV = sbtBinaryVersion.value
           val scalaBV = scalaBinaryVersion.value
           Seq(
-            rjs,
-            sbtPluginExtra(alphardSbtWeb, sbtBV, scalaBV),
-            sbtPluginExtra(sbtLess, sbtBV, scalaBV),
-            sbtPluginExtra(sbtSass, sbtBV, scalaBV)
+            sbtPluginExtra(alphardSbtWeb, sbtBV, scalaBV)
           )
         }
       )
