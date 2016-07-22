@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.q
 
-import SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
+import io.noplay.sbt.require.SbtRequire
+import io.noplay.sbt.require.SbtRequire.autoImport.RequireConfiguration.Shim
+import io.noplay.sbt.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
-object SbtJquery
+object SbtQ
   extends AutoPlugin {
   override val requires = SbtRequire
 
   object autoImport {
-    val jqueryVersion = settingKey[String]( "The Jquery version" )
+    val qVersion = settingKey[String]( "The Q library version" )
   }
 
-  import SbtJquery.autoImport._
+  import SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/dist/jquery",
-    requireConfigurationShim += "jquery" -> Shim.Config( exports = Some( "$" ) )
+    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q",
+    requireConfigurationShim += "q" -> Shim.Config(exports = Some("Q"))
   )
 
   override val projectSettings = Seq(
-    jqueryVersion := "3.0.0",
-    libraryDependencies += "org.webjars.npm" % "jquery" % jqueryVersion.value
+    qVersion := "1.4.1",
+    libraryDependencies += "org.webjars.npm" % "q" % qVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

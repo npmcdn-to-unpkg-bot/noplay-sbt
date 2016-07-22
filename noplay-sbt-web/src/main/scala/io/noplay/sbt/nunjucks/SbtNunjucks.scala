@@ -13,32 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt.font
+package io.noplay.sbt.nunjucks
 
 import com.typesafe.sbt.web.Import.WebKeys._
-import com.typesafe.sbt.web.Import._
+import com.typesafe.sbt.web.SbtWeb.autoImport._
+import io.alphard.sbt.util.Javascript
 import io.noplay.sbt.require.SbtRequire
 import SbtRequire.autoImport._
 import io.noplay.sbt.require.SbtRequire
 import sbt.Keys._
 import sbt._
 
-object SbtFlagIcon
+
+object SbtNunjucks
   extends AutoPlugin {
+
   override val requires = SbtRequire
 
   object autoImport {
-    val flagIconVersion = settingKey[String]( "The flag icon version" )
+    val nunjucksVersion = settingKey[String]("Nunjucks version")
   }
 
-  import SbtFlagIcon.autoImport._
+  import SbtNunjucks.autoImport._
 
-  val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "flag-icon-css" -> s"/${webModulesLib.value}/flag-icon-css"
+  override lazy val projectSettings = Seq(
+    nunjucksVersion := "2.4.2",
+    libraryDependencies += "org.webjars" % "nunjucks" % nunjucksVersion.value
+  ) ++ inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
+
+  private lazy val unscopedSettings = Seq(
+    requireConfigurationPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks",
+    requireConfigurationShim += "nunjucks" -> RequireConfiguration.Shim.Config(
+      init = Some(
+        Javascript.Function(
+          s"""function(angular) {
+              |  return nunjucks;
+              |}
+          """.stripMargin
+        )
+      )
+    )
   )
 
-  override val projectSettings = Seq(
-    flagIconVersion := "2.3.0",
-    libraryDependencies += "org.webjars.npm" % "flag-icon-css" % flagIconVersion.value
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

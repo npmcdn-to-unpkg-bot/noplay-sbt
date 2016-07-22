@@ -18,8 +18,9 @@ package io.noplay.sbt.angular
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import io.alphard.sbt.util.Javascript
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
+import SbtRequire.autoImport.RequireConfiguration.Shim
+import SbtRequire.autoImport._
 import io.noplay.sbt.bootstrap.SbtBootstrap
 import sbt.Keys._
 import sbt._

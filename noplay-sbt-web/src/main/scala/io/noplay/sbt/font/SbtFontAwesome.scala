@@ -17,8 +17,9 @@ package io.noplay.sbt.font
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import io.noplay.sbt.SbtRequire
-import io.noplay.sbt.SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
+import SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
 import sbt.Keys._
 import sbt._
 

@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.loggly
 
+import com.typesafe.sbt.web.Import.WebKeys._
+import com.typesafe.sbt.web.Import.{WebKeys, _}
 import io.alphard.sbt.SbtNpm
 import io.alphard.sbt.SbtNpm.autoImport._
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration
-import io.noplay.sbt.SbtRequire.autoImport._
 import io.alphard.sbt.util.Javascript
-import com.typesafe.sbt.web.Import.WebKeys
-import com.typesafe.sbt.web.Import.WebKeys._
-import com.typesafe.sbt.web.Import._
+import io.noplay.sbt.require.SbtRequire
+import io.noplay.sbt.require.SbtRequire.autoImport.{RequireConfiguration, _}
 import sbt._
 
 object SbtLoggly

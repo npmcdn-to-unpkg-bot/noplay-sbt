@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.lodash
 
-import SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
+import io.noplay.sbt.require.SbtRequire
+import io.noplay.sbt.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
