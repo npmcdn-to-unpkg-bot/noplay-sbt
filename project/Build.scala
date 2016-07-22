@@ -6,23 +6,9 @@ import sbt._
 
 object BuildDependencies {
 
-  //////////
-  // CORE //
-  //////////
-
-  val alphardSbtVersion = "3.35.0"
+  val alphardSbtVersion = "3.36.0"
   val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
-
-  /////////
-  // JVM //
-  /////////
-
   val alphardSbtJvm = "io.alphard" %% "alphard-sbt-jvm" % alphardSbtVersion
-
-  /////////
-  // WEB //
-  /////////
-
   val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
 
 }
