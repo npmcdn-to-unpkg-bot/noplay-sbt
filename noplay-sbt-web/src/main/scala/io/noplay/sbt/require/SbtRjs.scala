@@ -226,7 +226,7 @@ object SbtRjs
             (engineType in rjs).value,
             (command in rjs).value,
             Nil,
-            (webJarsNodeModulesDirectory in Plugin).value / "requirejs" / "bin" / "r.js",
+            npmModulesDirectory.value / "requirejs" / "bin" / "r.js",
             Seq("-o", targetBuildProfileFile.getAbsolutePath),
             (timeoutPerSource in rjs).value * optimizerMappings.size
           )
