@@ -13,32 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.require
 
-import SbtRequire.autoImport._
-import com.typesafe.sbt.web.Import.WebKeys._
-import com.typesafe.sbt.web.Import._
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
+import com.typesafe.sbt.web.SbtWeb.autoImport._
+import io.noplay.sbt.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
-object SbtQ
+object SbtRequireText
   extends AutoPlugin {
+
   override val requires = SbtRequire
 
   object autoImport {
-    val qVersion = settingKey[String]( "The Q library version" )
+    val requireTextVersion = settingKey[String]("Require text version")
   }
 
-  import SbtQ.autoImport._
+  import SbtRequireText.autoImport._
 
-  val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q",
-    requireConfigurationShim += "q" -> Shim.Config(exports = Some("Q"))
+  override lazy val projectSettings = Seq(
+    requireTextVersion := "2.0.15",
+    libraryDependencies += "org.webjars" % "requirejs-text" % requireTextVersion.value
+  ) ++ inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
+
+  private lazy val unscopedSettings = Seq(
+    requireConfigurationPaths += "text" -> s"/${WebKeys.webModulesLib.value}/requirejs-text/text"
   )
 
-  override val projectSettings = Seq(
-    qVersion := "1.4.1",
-    libraryDependencies += "org.webjars.npm" % "q" % qVersion.value
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

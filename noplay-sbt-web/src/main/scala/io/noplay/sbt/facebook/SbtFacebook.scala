@@ -17,9 +17,10 @@ package io.noplay.sbt.facebook
 
 import com.typesafe.sbt.web.Import._
 import io.alphard.sbt.util.Javascript
-import io.noplay.sbt.SbtRequire
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
+import SbtRequire.autoImport.RequireConfiguration.Shim
+import SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
 import sbt._
 
 object SbtFacebook

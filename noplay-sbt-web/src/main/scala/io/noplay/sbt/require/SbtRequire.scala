@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.require
 
 import java.io.File
 
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
 import io.alphard.sbt.util.Javascript
+import io.noplay.sbt.SbtWebIndex
 import io.noplay.sbt.SbtWebIndex.autoImport._
-import io.noplay.sbt.SbtRjs.autoImport._
+import io.noplay.sbt.require.SbtRjs.autoImport._
 import sbt.Keys._
 import sbt._
 
 object SbtRequire
   extends AutoPlugin {
 
-  private val DefaultRequireMainTemplate = "/io/noplay/sbt/requirejs.js.ftl"
+  private val DefaultRequireMainTemplate = "/io/noplay/sbt/require/requirejs.js.ftl"
 
   override val requires = SbtWebIndex && SbtRjs
 

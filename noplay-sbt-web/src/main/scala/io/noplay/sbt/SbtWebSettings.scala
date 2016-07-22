@@ -17,6 +17,7 @@ package io.noplay.sbt
 
 import com.typesafe.sbt.web.SbtWeb
 import io.alphard.sbt.{SbtWebBrowser, SbtWebServer}
+import io.noplay.sbt.require.SbtRequire
 import sbt.AutoPlugin
 
 object SbtWebSettings

@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt
+package io.noplay.sbt.require
 
-import io.alphard.sbt.SbtNpm
-import io.alphard.sbt.SbtNpm.autoImport._
-import sbt._
-import sbt.Keys._
+import java.io.{BufferedReader, InputStreamReader}
+import java.nio.charset.Charset
+
+import com.typesafe.sbt.jse.{SbtJsEngine, SbtJsTask}
 import com.typesafe.sbt.web.SbtWeb
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebJs._
 import com.typesafe.sbt.web.pipeline.Pipeline
-import com.typesafe.sbt.jse.{SbtJsEngine, SbtJsTask}
-import java.nio.charset.Charset
+import io.alphard.sbt.SbtNpm
+import io.alphard.sbt.SbtNpm.autoImport._
+import sbt.Keys._
+import sbt._
+
 import scala.collection.immutable.SortedMap
-import java.io.{InputStreamReader, BufferedReader}
 
 object SbtRjs
   extends AutoPlugin {
@@ -66,10 +68,10 @@ object SbtRjs
     }
   }
 
-  import SbtWeb.autoImport._
-  import WebKeys._
   import SbtJsEngine.autoImport.JsEngineKeys._
   import SbtJsTask.autoImport.JsTaskKeys._
+  import SbtWeb.autoImport._
+  import WebKeys._
   import autoImport._
   import RjsKeys._
 
@@ -134,7 +136,7 @@ object SbtRjs
   }
 
   private def getBuildWriter: Def.Initialize[Task[JavaScript]] = Def.task {
-    val source = getResourceAsList("io/noplay/sbt/buildWriter.js")
+    val source = getResourceAsList("io/noplay/sbt/require/buildWriter.js")
       .to[Vector]
       .dropRight(1) :+ s"""})(
           ${JS(unixPath(mainConfigFile.value.toString))},

@@ -13,32 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.noplay.sbt.font
+package io.noplay.sbt.jquery
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import io.noplay.sbt.require.SbtRequire
-import SbtRequire.autoImport._
-import io.noplay.sbt.require.SbtRequire
+import io.noplay.sbt.require.SbtRequire.autoImport.RequireConfiguration.Shim
+import io.noplay.sbt.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
-object SbtFlagIcon
+object SbtJquery
   extends AutoPlugin {
   override val requires = SbtRequire
 
   object autoImport {
-    val flagIconVersion = settingKey[String]( "The flag icon version" )
+    val jqueryVersion = settingKey[String]( "The Jquery version" )
   }
 
-  import SbtFlagIcon.autoImport._
+  import SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "flag-icon-css" -> s"/${webModulesLib.value}/flag-icon-css"
+    requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/dist/jquery",
+    requireConfigurationShim += "jquery" -> Shim.Config( exports = Some( "$" ) )
   )
 
   override val projectSettings = Seq(
-    flagIconVersion := "2.3.0",
-    libraryDependencies += "org.webjars.npm" % "flag-icon-css" % flagIconVersion.value
+    jqueryVersion := "3.0.0",
+    libraryDependencies += "org.webjars.npm" % "jquery" % jqueryVersion.value
   ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
 }

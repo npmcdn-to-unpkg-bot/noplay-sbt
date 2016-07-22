@@ -15,10 +15,12 @@
  */
 package io.noplay.sbt.byteground
 
-import io.noplay.sbt.SbtRequire.autoImport._
+import io.noplay.sbt.jquery.SbtJquery
+import io.noplay.sbt.q.SbtQ
+import io.noplay.sbt.require.SbtRequire
+import SbtRequire.autoImport._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import io.noplay.sbt.{SbtJquery, SbtQ}
 import io.noplay.sbt.angular.SbtAngular
 import io.noplay.sbt.bootstrap.SbtBootstrap
 import sbt.Keys._

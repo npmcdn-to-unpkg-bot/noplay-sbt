@@ -16,9 +16,10 @@
 package io.noplay.sbt.twitter
 
 import com.typesafe.sbt.web.Import._
-import io.noplay.sbt.SbtRequire
-import io.noplay.sbt.SbtRequire.autoImport.RequireConfiguration.Shim
-import io.noplay.sbt.SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
+import SbtRequire.autoImport.RequireConfiguration.Shim
+import SbtRequire.autoImport._
+import io.noplay.sbt.require.SbtRequire
 import sbt._
 
 object SbtTwitter
