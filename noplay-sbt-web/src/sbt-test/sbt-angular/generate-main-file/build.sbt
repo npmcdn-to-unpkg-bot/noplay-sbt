@@ -1,8 +1,8 @@
 lazy val root = (project in file(".")).enablePlugins(SbtAngular).settings(
   requireConfigurationPaths in Assets += "index" -> "index",
-  requireMainModuleId in Assets := "index",
+  requireCallbackModule in Assets := "index",
   requireConfigurationPaths in TestAssets += "index" -> "index",
-  requireMainModuleId in TestAssets := "index",
+  requireCallbackModule in TestAssets := "index",
   TaskKey[Unit]("checkRequireSettings") := {
     val mainFile = (requireMainFile in Assets).value
     val mainFileContent = IO.read(mainFile).replace('\n', ' ').replace('\r', ' ').replace(" ", "")
