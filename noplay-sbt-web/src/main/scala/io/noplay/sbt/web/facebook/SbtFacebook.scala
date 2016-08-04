@@ -16,11 +16,9 @@
 package io.noplay.sbt.web.facebook
 
 import com.typesafe.sbt.web.Import._
-import io.alphard.sbt.util.Javascript
+import com.typesafe.sbt.web.js.JavaScript
 import io.noplay.sbt.web.require.SbtRequire
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import SbtRequire.autoImport._
-import io.noplay.sbt.web.require.SbtRequire
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt._
 
 object SbtFacebook
@@ -37,19 +35,19 @@ object SbtFacebook
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "facebook" -> "//connect.facebook.net/en_US/sdk",
     requireConfigurationShim ++= Seq(
-      "facebook" -> Shim.Config(
+      "facebook" -> RequireShimConfig(
         deps = Seq("module"),
         exports = Option("FB"),
         init = Some(
-          Javascript.Function(
+          JavaScript(
             s"""function(module) {
-              |  var config = (module.config && module.config()) || {};
-              |  FB.init({
-              |    appId: config.appId,
-              |    xfbml: config.xfbml || ${facebookDefaultXfbmlEnabled.value},
-              |    version: config.version || '${facebookDefaultVersion.value}'
-              |  });
-              |}
+                |  var config = (module.config && module.config()) || {};
+                |  FB.init({
+                |    appId: config.appId,
+                |    xfbml: config.xfbml || ${facebookDefaultXfbmlEnabled.value},
+                |    version: config.version || '${facebookDefaultVersion.value}'
+                |  });
+                |}
             """.stripMargin
           )
         )

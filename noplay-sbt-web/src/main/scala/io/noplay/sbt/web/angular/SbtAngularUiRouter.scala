@@ -17,10 +17,8 @@ package io.noplay.sbt.web.angular
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import io.alphard.sbt.util.Javascript
-import io.noplay.sbt.web.require.SbtRequire
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import SbtRequire.autoImport._
+import com.typesafe.sbt.web.js.JavaScript
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -36,10 +34,10 @@ object SbtAngularUiRouter
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "angular-ui-router" -> s"/${webModulesLib.value}/angular-ui-router/release/angular-ui-router",
-    requireConfigurationShim += "angular-ui-router" -> Shim.Config(
+    requireConfigurationShim += "angular-ui-router" -> RequireShimConfig(
       Seq("angular"),
       init = Some(
-        Javascript.Function(
+        JavaScript(
           """function(angular) {
             |  return angular
             |    .module("ui.router.compat")

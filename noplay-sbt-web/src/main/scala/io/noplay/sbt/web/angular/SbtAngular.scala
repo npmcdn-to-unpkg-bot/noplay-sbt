@@ -17,11 +17,9 @@ package io.noplay.sbt.web.angular
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import io.alphard.sbt.util.Javascript
+import com.typesafe.sbt.web.js.JavaScript
 import io.noplay.sbt.web.require.SbtRequire
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import SbtRequire.autoImport._
-import io.noplay.sbt.web.require.SbtRequire
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -38,11 +36,11 @@ object SbtAngular
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "angular" -> path(webModulesLib.value, "angular"),
-    requireConfigurationShim += "angular" -> Shim.Config(exports = Some("angular"))
+    requireConfigurationShim += "angular" -> RequireShimConfig(exports = Some("angular"))
   )
 
   override lazy val projectSettings = Seq(
-    angularVersion := "1.5.7",
+    angularVersion := "1.5.8",
     libraryDependencies += module("angular", angularVersion.value)
   ) ++
     inConfig(Assets)(unscopedProjectSettings) ++
@@ -70,10 +68,10 @@ object SbtAngular
       requireConfigurationPaths +=
         name -> path(webModulesLib.value, name),
       requireConfigurationShim +=
-        name -> RequireConfiguration.Shim.Config(
+        name -> RequireShimConfig(
           Seq("angular"),
           init = Some(
-            Javascript.Function(
+            JavaScript(
               s"""function(angular) {
                   |  return angular.module('$angularName');
                   |}

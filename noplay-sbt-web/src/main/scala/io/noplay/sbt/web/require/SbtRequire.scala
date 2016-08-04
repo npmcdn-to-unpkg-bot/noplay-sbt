@@ -17,13 +17,13 @@ package io.noplay.sbt.web.require
 
 import java.io.File
 
+import com.typesafe.sbt.jse.SbtJsTask
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
-import io.alphard.sbt.util.Javascript
+import com.typesafe.sbt.web.js.{JavaScript, JS}
 import io.noplay.sbt.web.SbtWebIndex
-import SbtWebIndex.autoImport._
+import io.noplay.sbt.web.SbtWebIndex.autoImport._
 import io.noplay.sbt.web.require.SbtRjs.autoImport._
-import io.noplay.sbt.web.SbtWebIndex
 import sbt.Keys._
 import sbt._
 
@@ -32,126 +32,61 @@ object SbtRequire
 
   private val DefaultRequireMainTemplate = "/io/noplay/sbt/web/require/requirejs.js.ftl"
 
-  override val requires = SbtWebIndex && SbtRjs
+  override val requires = SbtWebIndex && SbtJsTask && SbtRjs
 
   object autoImport {
 
-    object RequireModule {
-      type Id = String
-      type Path = String
-      object Path {
-        def minify(path: String, minified: Boolean = false) = path + (if (minified) ".min" else "")
-        def filename(path: String, extension: String = "js"): String = path + "." + extension
-        def relativize(path: String): String = if (path.startsWith("/")) path.substring(1) else path
-      }
+    type RequireId = String
+    type RequirePath = String
+
+    object RequirePath {
+      def minify(path: String, minified: Boolean = false) = path + (if (minified) ".min" else "")
+      def filename(path: String, extension: String = "js"): String = path + "." + extension
+      def relativize(path: String): String = if (path.startsWith("/")) path.substring(1) else path
     }
 
-    case class RequirePackage(name: String, main: String) {
-      private[SbtRequire] lazy val toMap: Map[String, Any] =
-        Map(
-          "name" -> name,
-          "main" -> main
-        )
-    }
+    type RequirePaths = Seq[(RequireId, RequirePath)]
+    type RequireBundles = Seq[(RequireId, Seq[RequirePath])]
+    type RequireShim = Seq[(String, RequireShimConfig)]
+    final case class RequireShimConfig(deps: Seq[RequireId] = Nil, exports: Option[String] = None, init: Option[JavaScript] = None)
+    type RequireMap = Seq[(String, Map[RequireId, RequireId])]
+    type RequireConfig = Seq[(RequireId, JS[_])]
+    final case class RequirePackage(name: String, main: String)
+    type RequirePackages = Seq[(RequireId, RequirePackage)]
 
-    object RequireConfiguration {
-      type Paths = Seq[(RequireModule.Id, RequireModule.Path)]
-      type Bundles = Seq[(RequireModule.Id, Seq[RequireModule.Path])]
-      type Shim = Seq[(String, Shim.Config)]
+    sealed trait RequireOptimizer
+    final case class Uglify(configuration: JS.Object) extends RequireOptimizer
+    final case class Uglify2(configuration: JS.Object) extends RequireOptimizer
+    final case class Closure(configuration: JS.Object) extends RequireOptimizer
 
-      object Shim {
-
-        case class Config(deps: Seq[RequireModule.Id] = Nil,
-                          exports: Option[String] = None,
-                          init: Option[Javascript.Function] = None) {
-          private[SbtRequire] lazy val toMap: Map[String, Any] =
-            Map(
-              "deps" -> deps,
-              "exports" -> exports,
-              "init" -> init
-            )
-        }
-
-      }
-
-      type _Map = Seq[(String, Map[RequireModule.Id, RequireModule.Id])]
-      type Packages = Seq[(RequireModule.Id, RequirePackage)]
-      type Config = Seq[(RequireModule.Id, Map[String, Any])]
-    }
-
-    case class RequireConfiguration(baseUrl: Option[String],
-                                    paths: RequireConfiguration.Paths,
-                                    bundles: RequireConfiguration.Bundles,
-                                    shim: RequireConfiguration.Shim,
-                                    map: RequireConfiguration._Map,
-                                    config: RequireConfiguration.Config,
-                                    packages: RequireConfiguration.Packages,
-                                    nodeIdCompat: Boolean,
-                                    waitSeconds: Int,
-                                    context: Option[String],
-                                    deps: Seq[RequireModule.Id],
-                                    callback: Option[Javascript.Function],
-                                    enforceDefine: Boolean,
-                                    xhtml: Boolean,
-                                    urlArgs: Option[String],
-                                    scriptType: String,
-                                    skipDataMain: Boolean) {
-      private[SbtRequire] def toMap(implicit logger: Logger): Map[String, _] =
-        Map(
-          "baseUrl" -> baseUrl,
-          asMap("paths", paths),
-          asMap("bundles", bundles),
-          asMap("shim", shim.map { case (k, v) => (k, v.toMap) }),
-          asMap("map", map.groupBy(_._1).toSeq.map { case (k, v) => (k, v.unzip._2.reduce(_ ++ _)) }),
-          asMap("config", config),
-          asMap("packages", packages.map { case (k, v) => (k, v.toMap) }),
-          "nodeIdCompat" -> nodeIdCompat,
-          "waitSeconds" -> waitSeconds,
-          "context" -> context,
-          "deps" -> deps,
-          "callback" -> callback,
-          "enforceDefine" -> enforceDefine,
-          "xhtml" -> xhtml,
-          "urlArgs" -> urlArgs,
-          "scriptType" -> scriptType,
-          "skipDataMain" -> skipDataMain
-        )
-
-      // (Map.empty[RequireModule.Id, RequireModule.Id] /: v.unzip._2)(_ ++ _)
-      private[SbtRequire] def asMap[K, V](key: String, seq: Seq[(K, V)])(implicit logger: Logger): (String, Map[K, V]) = {
-        seq.groupBy(_._1) foreach {
-          case (groupKey, groupValues) =>
-            if (groupValues.size > 1)
-              logger.warn(s"duplicate key '$groupKey' in '$key!")
-        }
-        (key, Map(seq: _*))
-      }
-    }
+    ///////////////////
+    // CONFIGURATION //
+    ///////////////////
 
     val requireConfigurationBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
-    val requireConfigurationPaths = settingKey[RequireConfiguration.Paths](
+    val requireConfigurationPaths = settingKey[RequirePaths](
       "The path mappings for module names not found directly under baseUrl"
     )
-    val requireConfigurationBundles = settingKey[RequireConfiguration.Bundles](
+    val requireConfigurationBundles = settingKey[RequireBundles](
       "The bundles allow configuring multiple module IDs to be found in another script"
     )
-    val requireConfigurationShim = settingKey[RequireConfiguration.Shim](
+    val requireConfigurationShim = settingKey[RequireShim](
       """Configure the dependencies, exports, and custom initialization for older,
         |traditional "browser globals" scripts that do not use define()
         |to declare the dependencies and set a module value.
       """.stripMargin
     )
-    val requireConfigurationMap = settingKey[RequireConfiguration._Map](
+    val requireConfigurationMap = settingKey[RequireMap](
       """For the given module prefix, instead of loading the module
         |with the given ID, substitute a different module ID
       """.stripMargin
     )
-    val requireConfigurationConfig = settingKey[RequireConfiguration.Config](
+    val requireConfigurationConfig = settingKey[RequireConfig](
       """There is a common need to pass configuration info to a module.
         |That configuration info is usually known as part of the application,
         |and there needs to be a way to pass that down to a module.
       """.stripMargin)
-    val requireConfigurationPackages = settingKey[RequireConfiguration.Packages](
+    val requireConfigurationPackages = settingKey[RequirePackages](
       """There is a common need to pass configuration info to a module.
         |That configuration info is usually known as part of the application,
         |and there needs to be a way to pass that down to a module.
@@ -173,12 +108,12 @@ object SbtRequire
         |see the Multiversion Support section.
       """.stripMargin
     )
-    val requireConfigurationDeps = settingKey[Seq[RequireModule.Id]](
+    val requireConfigurationDeps = settingKey[Seq[RequireId]](
       """An array of dependencies to load.
         |Useful when require is defined as a config object before require.js is loaded,
         |and you want to specify dependencies to load as soon as require() is defined.
       """.stripMargin)
-    val requireConfigurationCallback = settingKey[Option[Javascript.Function]](
+    val requireConfigurationCallback = settingKey[Option[JavaScript]](
       """A function to execute after deps have been loaded.
         |Useful when require is defined as a config object before require.js is loaded,
         |and you want to specify a function to require after the configuration's deps array has been loaded.
@@ -205,11 +140,22 @@ object SbtRequire
         | and the embedded version should not do data-main loading.
       """.stripMargin
     )
-    val requireConfiguration = settingKey[RequireConfiguration]("The full configuration object")
-    val requireVersion = settingKey[String]("The require js version")
+    val requireConfiguration = settingKey[JS.Object]("The full configuration object")
+
+    //////////////////
+    // OPTIMIZATION //
+    //////////////////
+
+    val requireOptimization = settingKey[JS.Object]("The full optimization object")
+    val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
     val requireMinified = settingKey[Boolean]("If true the minified versions of modules in paths are used")
     val requireCDN = settingKey[Boolean]("If true the CDN versions of modules in paths are used")
-    val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
+
+    ////////////////
+    // GENERATION //
+    ////////////////
+
+    val requireVersion = settingKey[String]("The require js version")
     val requirePath = settingKey[String]("The web jars require js path")
     val requireDirectory = settingKey[File]("The main file directory")
     val requireMainModule = settingKey[String]("The main module name")
@@ -219,12 +165,17 @@ object SbtRequire
     val requireMainGenerator = taskKey[Seq[File]]("Generate the config file")
     val requireIncludeFilter = settingKey[FileFilter]("The include filter generated from paths")
     val requireExcludeFilter = settingKey[FileFilter]("The exclude filter generated from paths")
-    val requireCallbackModule = settingKey[RequireModule.Id]("The callback module name")
+    val requireCallbackModule = settingKey[RequireId]("The callback module name")
 
     lazy val unscopedProjectSettings = Seq(
+
+      ///////////////////
+      // CONFIGURATION //
+      ///////////////////
+
       requireConfigurationBaseUrl := None,
       requireConfigurationPaths := Seq(
-        requireMainModule.value -> RequireModule.Path.minify(requireMainModule.value, requireMinified.value)
+        requireMainModule.value -> RequirePath.minify(requireMainModule.value, requireMinified.value)
       ),
       requireConfigurationBundles := Nil,
       requireConfigurationShim := Nil,
@@ -235,51 +186,87 @@ object SbtRequire
       requireConfigurationWaitSeconds := 7,
       requireConfigurationContext := None,
       requireConfigurationDeps := Nil,
-      requireConfigurationCallback := Some(Javascript.Function(
-        s"""function() { require(['${requireCallbackModule.value}']); }""")
+      requireConfigurationCallback := Some(
+        JavaScript(s"""function() { require(['${requireCallbackModule.value}']); }""")
       ),
       requireConfigurationEnforceDefine := false,
       requireConfigurationXhtml := false,
       requireConfigurationUrlArgs := None,
       requireConfigurationScriptType := "text/javascript",
       requireConfigurationSkipDataMain := false,
-      requireConfiguration := RequireConfiguration(
-        requireConfigurationBaseUrl.value,
-        requireConfigurationPaths.value,
-        requireConfigurationBundles.value,
-        requireConfigurationShim.value,
-        requireConfigurationMap.value,
-        requireConfigurationConfig.value,
-        requireConfigurationPackages.value,
-        requireConfigurationNodeIdCompat.value,
-        requireConfigurationWaitSeconds.value,
-        requireConfigurationContext.value,
-        requireConfigurationDeps.value,
-        requireConfigurationCallback.value,
-        requireConfigurationEnforceDefine.value,
-        requireConfigurationXhtml.value,
-        requireConfigurationUrlArgs.value,
-        requireConfigurationScriptType.value,
-        requireConfigurationSkipDataMain.value
+      requireConfiguration := JS.Object(
+        "baseUrl" -> requireConfigurationBaseUrl.value,
+        "paths" -> JS.Object(requireConfigurationPaths.value.map {
+          case (id, path) =>
+            id -> JS(path) } : _*
+        ),
+        "bundles" -> JS.Object(requireConfigurationBundles.value.map {
+          case (id, bundle) =>
+            id -> JS(bundle)
+        }: _*),
+        "shim" -> JS.Object(requireConfigurationShim.value.map {
+          case (id, RequireShimConfig(deps, exports, init)) =>
+            id -> JS.Object(
+              "deps" -> deps,
+              "exports" ->  exports,
+              "init" -> init
+            )
+        }:_*),
+        "map" -> requireConfigurationMap.value.groupBy(_._1).toSeq.map {
+          case (k, v) =>
+            k -> v.unzip._2.reduce(_ ++ _)
+        },
+        "config" -> JS.Object(requireConfigurationConfig.value: _*),
+        "packages" -> requireConfigurationPackages.value.map {
+          case (id, _package) =>
+            id -> JS.Object(
+              "name" -> _package.name,
+              "main" -> _package.main
+            )
+        },
+        "nodeIdCompat" -> requireConfigurationNodeIdCompat.value,
+        "waitSeconds" -> requireConfigurationWaitSeconds.value,
+        "context" -> requireConfigurationContext.value,
+        "deps" -> requireConfigurationDeps.value,
+        "callback" -> requireConfigurationCallback.value,
+        "enforceDefine" -> requireConfigurationEnforceDefine.value,
+        "xhtml" -> requireConfigurationXhtml.value,
+        "urlArgs" -> requireConfigurationUrlArgs.value,
+        "scriptType" -> requireConfigurationScriptType.value,
+        "skipDataMain" -> requireConfigurationSkipDataMain.value
       ),
+
+      //////////////////
+      // OPTIMIZATION //
+      //////////////////
+
+      requireOptimization := JS.Object(),
+      requireOptimized := true,
       requireMinified := true,
       requireCDN := true,
-      requireOptimized := true,
+
+      ////////////////
+      // GENERATION //
+      ////////////////
+      
       requireDirectory := sourceManaged.value / "require-js",
       requirePath := {
         val path = if (requireCDN.value)
           s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
         else
           s"/${webModulesLib.value}/requirejs/require"
-        RequireModule.Path.filename(RequireModule.Path.minify(path, requireMinified.value))
+        RequirePath.filename(RequirePath.minify(path, requireMinified.value))
       },
       requireMainModule := "main",
-      requireMainPath := RequireModule.Path.minify(requireConfigurationBaseUrl.value.getOrElse("") + "/" + requireMainModule.value, requireMinified.value),
+      requireMainPath := RequirePath.minify(
+        requireConfigurationBaseUrl.value.getOrElse("") + "/" + requireMainModule.value,
+        requireMinified.value
+      ),
       requireMainTemplateFile := None,
-      requireMainFile := requireDirectory.value / RequireModule.Path.filename(RequireModule.Path.relativize(requireMainPath.value)),
+      requireMainFile := requireDirectory.value / RequirePath.filename(RequirePath.relativize(requireMainPath.value)),
       requireMainGenerator := {
         implicit val logger = streams.value.log
-        val configuration = Javascript.toJs(requireConfiguration.value.toMap)
+        val configuration = requireConfiguration.value.js
         val moduleId = requireCallbackModule.value
         val mainTemplate = requireMainTemplateFile.value.map(IO.read(_)) getOrElse {
           IO.readStream(getClass.getResource(DefaultRequireMainTemplate).openStream())
@@ -320,7 +307,7 @@ object SbtRequire
         SbtWebIndex.autoImport.Script(
           requirePath.value,
           async = true,
-          attributes = Map("data-main" -> RequireModule.Path.filename(requireMainPath.value))
+          attributes = Map("data-main" -> RequirePath.filename(requireMainPath.value))
         )
       )
     )
@@ -330,9 +317,9 @@ object SbtRequire
 
   val rjsSettings = Seq(
     RjsKeys.version := requireVersion.value,
-    RjsKeys.baseUrl := (requireConfigurationBaseUrl in Assets).value.map(RequireModule.Path.relativize).getOrElse("."),
-    RjsKeys.mainConfig := RequireModule.Path.minify((requireMainModule in Assets).value, (requireMinified in Assets).value),
-    RjsKeys.mainConfigFile := new File(RequireModule.Path.relativize(s"${RjsKeys.baseUrl.value}/${RequireModule.Path.filename(RjsKeys.mainConfig.value)}")),
+    RjsKeys.baseUrl := (requireConfigurationBaseUrl in Assets).value.map(RequirePath.relativize).getOrElse("."),
+    RjsKeys.mainConfig := RequirePath.minify((requireMainModule in Assets).value, (requireMinified in Assets).value),
+    RjsKeys.mainConfigFile := new File(RequirePath.relativize(s"${RjsKeys.baseUrl.value}/${RequirePath.filename(RjsKeys.mainConfig.value)}")),
     pipelineStages ++= (if ((requireOptimized in Assets).value) Seq(rjs) else Nil)
   )
 
@@ -346,4 +333,13 @@ object SbtRequire
         "org.webjars" % "requirejs" % requireVersion.value
       )
     ) ++ rjsSettings
+
+  private[SbtRequire] def toJSObject(key: String, seq: Seq[(String, JS[_])])(implicit logger: Logger): (String, JS.Object) = {
+    seq.groupBy(_._1) foreach {
+      case (groupKey, groupValues) =>
+        if (groupValues.size > 1)
+          logger.warn(s"duplicate key '$groupKey' in '$key!")
+    }
+    (key, JS.Object(seq: _*))
+  }
 }

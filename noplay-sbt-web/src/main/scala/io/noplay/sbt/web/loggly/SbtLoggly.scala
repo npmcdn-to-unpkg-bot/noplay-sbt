@@ -17,11 +17,11 @@ package io.noplay.sbt.web.loggly
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import.{WebKeys, _}
+import com.typesafe.sbt.web.js.JavaScript
 import io.alphard.sbt.SbtNpm
 import io.alphard.sbt.SbtNpm.autoImport._
-import io.alphard.sbt.util.Javascript
 import io.noplay.sbt.web.require.SbtRequire
-import io.noplay.sbt.web.require.SbtRequire.autoImport.{RequireConfiguration, _}
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt._
 
 object SbtLoggly
@@ -67,11 +67,11 @@ object SbtLoggly
     webModuleGenerators <+= logglyWebModulesGenerator,
     requireConfigurationPaths += "loggly" -> s"/${webModulesLib.value}/${logglyLibraryName.value}/${logglyLibraryFileName.value}",
     requireConfigurationShim ++= Seq(
-      "loggly" -> RequireConfiguration.Shim.Config(
+      "loggly" -> RequireShimConfig(
         Seq("module"),
         exports = Some("_LTracker"),
         init = Some(
-          Javascript.Function(
+          JavaScript(
             s"""function(module) {
                 |  var config = (module.config && module.config()) || {};
                 |

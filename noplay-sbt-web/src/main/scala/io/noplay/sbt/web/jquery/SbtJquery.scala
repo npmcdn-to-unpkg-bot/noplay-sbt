@@ -18,7 +18,6 @@ package io.noplay.sbt.web.jquery
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
 import io.noplay.sbt.web.require.SbtRequire
-import io.noplay.sbt.web.require.SbtRequire.autoImport.RequireConfiguration.Shim
 import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
@@ -28,18 +27,18 @@ object SbtJquery
   override val requires = SbtRequire
 
   object autoImport {
-    val jqueryVersion = settingKey[String]( "The Jquery version" )
+    val jqueryVersion = settingKey[String]("The Jquery version")
   }
 
   import SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/dist/jquery",
-    requireConfigurationShim += "jquery" -> Shim.Config( exports = Some( "$" ) )
+    requireConfigurationShim += "jquery" -> RequireShimConfig(exports = Some("$"))
   )
 
   override val projectSettings = Seq(
     jqueryVersion := "3.0.0",
     libraryDependencies += "org.webjars.npm" % "jquery" % jqueryVersion.value
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
+  ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 }

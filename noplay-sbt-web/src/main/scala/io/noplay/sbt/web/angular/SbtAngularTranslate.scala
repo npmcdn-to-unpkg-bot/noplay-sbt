@@ -17,10 +17,8 @@ package io.noplay.sbt.web.angular
 
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.Import._
-import io.alphard.sbt.util.Javascript
-import io.noplay.sbt.web.require.SbtRequire
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import SbtRequire.autoImport._
+import com.typesafe.sbt.web.js.JavaScript
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
@@ -29,7 +27,7 @@ object SbtAngularTranslate
   override val requires = SbtAngular
 
   object autoImport {
-    val angularTranslateVersion = settingKey[String]( "Angular Translate version" )
+    val angularTranslateVersion = settingKey[String]("Angular Translate version")
   }
 
   import SbtAngularTranslate.autoImport._
@@ -46,10 +44,10 @@ object SbtAngularTranslate
       path(webModulesLib.value, "storage-local")
     ),
     requireConfigurationShim ++= Seq(
-      "angular-translate" -> Shim.Config(
+      "angular-translate" -> RequireShimConfig(
         Seq("angular"),
         init = Some(
-          Javascript.Function(
+          JavaScript(
             """function(angular) {
               |  return angular.module("pascalprecht.translate");
               |}
@@ -57,13 +55,13 @@ object SbtAngularTranslate
           )
         )
       ),
-      "angular-translate-handler-log" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-interpolation-messageformat" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-loader-partial" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-loader-static-files" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-loader-url" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-storage-cookie" -> RequireConfiguration.Shim.Config(Seq("angular-translate")),
-      "angular-translate-storage-local" -> RequireConfiguration.Shim.Config(Seq("angular-translate"))
+      "angular-translate-handler-log" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-interpolation-messageformat" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-loader-partial" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-loader-static-files" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-loader-url" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-storage-cookie" -> RequireShimConfig(Seq("angular-translate")),
+      "angular-translate-storage-local" -> RequireShimConfig(Seq("angular-translate"))
     )
   )
 
@@ -72,7 +70,7 @@ object SbtAngularTranslate
     libraryDependencies ++= Seq(
       "org.webjars.npm" % "angular-translate" % angularTranslateVersion.value
     )
-  ) ++ inConfig( Assets )( unscopedProjectSettings ) ++ inConfig( TestAssets )( unscopedProjectSettings )
+  ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 
   private def path(libPath: String, suffix: String) =
     s"angular-translate-$suffix" -> s"/$libPath/angular-translate/dist/angular-translate-$suffix/angular-translate-$suffix"

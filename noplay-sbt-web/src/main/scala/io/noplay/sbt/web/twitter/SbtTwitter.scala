@@ -17,9 +17,7 @@ package io.noplay.sbt.web.twitter
 
 import com.typesafe.sbt.web.Import._
 import io.noplay.sbt.web.require.SbtRequire
-import SbtRequire.autoImport.RequireConfiguration.Shim
-import SbtRequire.autoImport._
-import io.noplay.sbt.web.require.SbtRequire
+import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt._
 
 object SbtTwitter
@@ -30,7 +28,7 @@ object SbtTwitter
   val unscopedProjectSettings = Seq(
     requireConfigurationPaths += "twitter" -> "//platform.twitter.com",
     requireConfigurationShim ++= Seq(
-      "twitter" -> Shim.Config(
+      "twitter" -> RequireShimConfig(
         Seq(),
         exports = Some("twttr")
       )
