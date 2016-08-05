@@ -16,11 +16,17 @@
 package io.noplay.sbt.web.require
 
 import java.io.File
+import java.nio.charset.Charset
 
 import com.typesafe.sbt.jse.SbtJsTask
+import com.typesafe.sbt.jse.SbtJsTask.autoImport._
+import com.typesafe.sbt.web._
 import com.typesafe.sbt.web.SbtWeb.autoImport.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
 import com.typesafe.sbt.web.js.{JavaScript, JS}
+import com.typesafe.sbt.web.pipeline.Pipeline
+import io.alphard.sbt.SbtNpm
+import io.alphard.sbt.SbtNpm.autoImport._
 import io.noplay.sbt.web.SbtWebIndex
 import io.noplay.sbt.web.SbtWebIndex.autoImport._
 import io.noplay.sbt.web.require.SbtRjs.autoImport._
@@ -32,7 +38,7 @@ object SbtRequire
 
   private val DefaultRequireMainTemplate = "/io/noplay/sbt/web/require/requirejs.js.ftl"
 
-  override val requires = SbtWebIndex && SbtJsTask && SbtRjs
+  override val requires = SbtNpm && SbtWebIndex && SbtJsTask && SbtRjs
 
   object autoImport {
 
@@ -147,9 +153,13 @@ object SbtRequire
     //////////////////
 
     val requireOptimization = settingKey[JS.Object]("The full optimization object")
+    val requireOptimizationDirectory = settingKey[File]("The optimization directory")
+    val requireOptimizationBuildDirectory = settingKey[File]("The optimization build directory")
+    val requireOptimizationStageDirectory = settingKey[File]("The optimization stage directory")
     val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
     val requireMinified = settingKey[Boolean]("If true the minified versions of modules in paths are used")
     val requireCDN = settingKey[Boolean]("If true the CDN versions of modules in paths are used")
+    val requireOptimize = taskKey[Pipeline.Stage]("Perform RequireJs optimization on the asset pipeline.")
 
     ////////////////
     // GENERATION //
@@ -241,13 +251,54 @@ object SbtRequire
       //////////////////
 
       requireOptimization := JS.Object(),
+      requireOptimizationDirectory := target.value / "rjs",
+      requireOptimizationDir := requireOptimizationDirectory.value / "build",
+      requireOptimizationAppDir := requireOptimizationDirectory.value / "app",
       requireOptimized := true,
       requireMinified := true,
       requireCDN := true,
+      requireOptimize := Def.task[Pipeline.Stage] {
+        mappings =>
+          val include = (includeFilter in requireOptimize).value
+          val exclude = (excludeFilter in requireOptimize).value
+          val optimizerMappings = mappings.filter(f => !f._1.isDirectory && include.accept(f._1) && !exclude.accept(f._1))
 
-      ////////////////
-      // GENERATION //
-      ////////////////
+          SbtWeb.syncMappings(
+            streams.value.cacheDirectory,
+            "rjs-sync",
+            optimizerMappings,
+            requireOptimizationDirectory.value
+          )
+
+          val targetBuildProfileFile = requireOptimizationBuildDirectory.value / "build.js"
+
+          IO.write(targetBuildProfileFile, requireOptimization.value.js, Charset.forName("UTF-8"))
+
+          val cacheDirectory = streams.value.cacheDirectory / "rjs-cache"
+          val runUpdate = FileFunction.cached(cacheDirectory, FilesInfo.hash) {
+            _ =>
+              streams.value.log.info("Optimizing JavaScript with RequireJS")
+
+              SbtJsTask.executeJs(
+                state.value,
+                engineType.value,
+                command.value,
+                Nil,
+                npmModulesDirectory.value / "requirejs" / "bin" / "r.js",
+                Seq("-o", targetBuildProfileFile.getAbsolutePath),
+                (timeoutPerSource in rjs).value * optimizerMappings.size
+              )
+
+              dir.value.***.get.toSet
+          }
+
+          val optimizedMappings = runUpdate(appDir.value.***.get.toSet).filter(_.isFile).pair(relativeTo(dir.value))
+          (mappings.toSet -- optimizerMappings.toSet ++ optimizedMappings).toSeq
+      }.value,
+
+      //////////////
+      // PIPELINE //
+      //////////////
       
       requireDirectory := sourceManaged.value / "require-js",
       requirePath := {
