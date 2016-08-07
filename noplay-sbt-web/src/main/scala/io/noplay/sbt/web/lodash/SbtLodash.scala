@@ -34,7 +34,7 @@ object SbtLodash
   import SbtLodash.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths ++= Seq(
+    requireMainConfigPaths ++= Seq(
       "lodash" -> s"/${webModulesLib.value}/lodash/lodash"
     )
   )

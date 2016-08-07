@@ -33,8 +33,8 @@ object SbtJquery
   import SbtJquery.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "jquery" -> s"/${webModulesLib.value}/jquery/dist/jquery",
-    requireConfigurationShim += "jquery" -> RequireShimConfig(exports = Some("$"))
+    requireMainConfigPaths += "jquery" -> s"/${webModulesLib.value}/jquery/dist/jquery",
+    requireMainConfigShim += "jquery" -> RequireShimConfig(exports = Some("$"))
   )
 
   override val projectSettings = Seq(

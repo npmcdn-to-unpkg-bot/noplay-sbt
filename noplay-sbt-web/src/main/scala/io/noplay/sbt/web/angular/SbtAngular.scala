@@ -35,8 +35,8 @@ object SbtAngular
   import SbtAngular.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular" -> path(webModulesLib.value, "angular"),
-    requireConfigurationShim += "angular" -> RequireShimConfig(exports = Some("angular"))
+    requireMainConfigPaths += "angular" -> path(webModulesLib.value, "angular"),
+    requireMainConfigShim += "angular" -> RequireShimConfig(exports = Some("angular"))
   )
 
   override lazy val projectSettings = Seq(
@@ -65,9 +65,9 @@ object SbtAngular
     val name = "angular-" + suffix
     val angularName = dashToCamelcase("ng-" + suffix)
     val unscopedSettings = Seq(
-      requireConfigurationPaths +=
+      requireMainConfigPaths +=
         name -> path(webModulesLib.value, name),
-      requireConfigurationShim +=
+      requireMainConfigShim +=
         name -> RequireShimConfig(
           Seq("angular"),
           init = Some(

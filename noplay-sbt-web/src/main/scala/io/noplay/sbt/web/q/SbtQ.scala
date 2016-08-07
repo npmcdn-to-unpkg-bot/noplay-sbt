@@ -33,8 +33,8 @@ object SbtQ
   import SbtQ.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "q" -> s"/${webModulesLib.value}/q/q",
-    requireConfigurationShim += "q" -> RequireShimConfig(exports = Some("Q"))
+    requireMainConfigPaths += "q" -> s"/${webModulesLib.value}/q/q",
+    requireMainConfigShim += "q" -> RequireShimConfig(exports = Some("Q"))
   )
 
   override val projectSettings = Seq(

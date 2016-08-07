@@ -33,10 +33,10 @@ object SbtAngularMaterial
   import SbtAngularMaterial.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths ++= Seq(
+    requireMainConfigPaths ++= Seq(
       "angular-material" -> s"/${webModulesLib.value}/angular-material/angular-material"
     ),
-    requireConfigurationShim +=
+    requireMainConfigShim +=
       "angular-material" -> RequireShimConfig(
         Seq("angular", "angular-animate", "angular-aria"),
         init = Some(

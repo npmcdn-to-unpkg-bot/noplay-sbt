@@ -34,10 +34,10 @@ object SbtAngularGoogleMaps
   import SbtAngularGoogleMaps.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths ++= Seq(
+    requireMainConfigPaths ++= Seq(
       "angular-google-maps" -> s"/${webModulesLib.value}/angular-google-maps/dist/angular-google-maps"
     ),
-    requireConfigurationShim +=
+    requireMainConfigShim +=
       "angular-google-maps" -> RequireShimConfig(
         deps = Seq("angular", "lodash"),
         init = Some(

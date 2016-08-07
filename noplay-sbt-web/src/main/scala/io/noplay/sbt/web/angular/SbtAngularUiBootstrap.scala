@@ -34,8 +34,8 @@ object SbtAngularUiBootstrap
   import SbtAngularUiBootstrap.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "angular-ui-bootstrap" -> s"/${webModulesLib.value}/angular-ui-bootstrap/dist/ui-bootstrap-tpls",
-    requireConfigurationShim += "angular-ui-bootstrap" -> RequireShimConfig(
+    requireMainConfigPaths += "angular-ui-bootstrap" -> s"/${webModulesLib.value}/angular-ui-bootstrap/dist/ui-bootstrap-tpls",
+    requireMainConfigShim += "angular-ui-bootstrap" -> RequireShimConfig(
       Seq("angular"),
       init = Some(
         JavaScript(

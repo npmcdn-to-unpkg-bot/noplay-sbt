@@ -34,7 +34,7 @@ object SbtFontAwesome
   import SbtFontAwesome.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "font-awesome" -> s"/${webModulesLib.value}/font-awesome"
+    requireMainConfigPaths += "font-awesome" -> s"/${webModulesLib.value}/font-awesome"
   )
 
   override lazy val projectSettings = Seq(
