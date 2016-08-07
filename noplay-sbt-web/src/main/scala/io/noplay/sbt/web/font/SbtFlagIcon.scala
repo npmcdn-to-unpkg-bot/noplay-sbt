@@ -34,7 +34,7 @@ object SbtFlagIcon
   import SbtFlagIcon.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "flag-icon-css" -> s"/${webModulesLib.value}/flag-icon-css"
+    requireMainConfigPaths += "flag-icon-css" -> s"/${webModulesLib.value}/flag-icon-css"
   )
 
   override val projectSettings = Seq(

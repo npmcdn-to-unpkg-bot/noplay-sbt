@@ -34,7 +34,7 @@ object SbtBootstrap
   import SbtBootstrap.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "bootstrap" -> s"/${webModulesLib.value}/bootstrap"
+    requireMainConfigPaths += "bootstrap" -> s"/${webModulesLib.value}/bootstrap"
   )
 
   override val projectSettings = Seq(

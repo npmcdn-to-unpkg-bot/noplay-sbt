@@ -43,8 +43,8 @@ object SbtNunjucks
   ) ++ inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
 
   private lazy val unscopedSettings = Seq(
-    requireConfigurationPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}",
-    requireConfigurationShim += "nunjucks" -> RequireShimConfig(
+    requireMainConfigPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}",
+    requireMainConfigShim += "nunjucks" -> RequireShimConfig(
       deps = Seq("module"),
       init = Some(
         JavaScript(

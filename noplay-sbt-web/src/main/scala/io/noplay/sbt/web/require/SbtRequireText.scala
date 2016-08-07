@@ -37,7 +37,7 @@ object SbtRequireText
   ) ++ inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
 
   private lazy val unscopedSettings = Seq(
-    requireConfigurationPaths += "text" -> s"/${WebKeys.webModulesLib.value}/requirejs-text/text"
+    requireMainConfigPaths += "text" -> s"/${WebKeys.webModulesLib.value}/requirejs-text/text"
   )
 
 }

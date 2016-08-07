@@ -49,13 +49,13 @@ object SbtAlphardWeb
       alphardWebPath(name, Some(path))
 
     private def alphardWebPath(name: String, path: Option[String]): Def.Setting[_] =
-      requireConfigurationPaths += name -> s"/${webModulesLib.value}/$Name/${path.getOrElse(name)}"
+      requireMainConfigPaths += name -> s"/${webModulesLib.value}/$Name/${path.getOrElse(name)}"
   }
 
   import autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
+    requireMainConfigPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
   ) ++ Seq(
     alphardWebPath("angular-analytics"),
     alphardWebPath("angular-auth", "angular-auth/auth"),
