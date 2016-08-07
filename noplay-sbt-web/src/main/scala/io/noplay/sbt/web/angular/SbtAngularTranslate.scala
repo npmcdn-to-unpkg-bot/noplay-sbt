@@ -33,7 +33,7 @@ object SbtAngularTranslate
   import SbtAngularTranslate.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireConfigurationPaths ++= Seq(
+    requireMainConfigPaths ++= Seq(
       "angular-translate" -> s"/${webModulesLib.value}/angular-translate/dist/angular-translate",
       path(webModulesLib.value, "handler-log"),
       path(webModulesLib.value, "interpolation-messageformat"),
@@ -43,7 +43,7 @@ object SbtAngularTranslate
       path(webModulesLib.value, "storage-cookie"),
       path(webModulesLib.value, "storage-local")
     ),
-    requireConfigurationShim ++= Seq(
+    requireMainConfigShim ++= Seq(
       "angular-translate" -> RequireShimConfig(
         Seq("angular"),
         init = Some(
