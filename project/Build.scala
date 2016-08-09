@@ -6,7 +6,7 @@ import sbt._
 
 object BuildDependencies {
 
-  val alphardSbtVersion = "3.36.0"
+  val alphardSbtVersion = "3.37.0"
   val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
   val alphardSbtJvm = "io.alphard" %% "alphard-sbt-jvm" % alphardSbtVersion
   val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
