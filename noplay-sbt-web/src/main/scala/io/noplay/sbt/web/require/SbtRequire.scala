@@ -36,8 +36,6 @@ import sbt._
 object SbtRequire
   extends AutoPlugin {
 
-  private val DefaultRequireMainTemplate = "/io/noplay/sbt/web/require/requirejs.js.ftl"
-
   override val requires = SbtNpm && SbtWebIndex && SbtJsTask
 
   object autoImport {
@@ -615,9 +613,9 @@ object SbtRequire
           s"/${webModulesLib.value}/requirejs/require"
         RequirePath.filename(RequirePath.minify(path, requireMinified.value))
       },
-      requireOptimized := true,
-      requireMinified := true,
-      requireCDN := true,
+      requireOptimized := false,
+      requireMinified := false,
+      requireCDN := false,
       npmDevDependencies += "requirejs" -> requireVersion.value,
       libraryDependencies ++= Seq(
         "org.webjars" % "requirejs" % requireVersion.value
@@ -716,7 +714,7 @@ object SbtRequire
       val configuration = requireMainConfig.value.js
       val moduleId = requireMainIndexModule.value
       val mainTemplate = requireMainTemplateFile.value.map(IO.read(_)) getOrElse {
-        IO.readStream(getClass.getResource(DefaultRequireMainTemplate).openStream())
+        IO.readStream(getClass.getResource("/io/noplay/sbt/web/require/requirejs.js.ftl").openStream())
       }
       val mainFile = requireMainFile.value
       if (!mainFile.exists()) {

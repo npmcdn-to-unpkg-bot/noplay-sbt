@@ -15,37 +15,98 @@
  */
 package io.noplay.sbt.web.nunjucks
 
+import com.typesafe.sbt.jse.SbtJsTask
+import com.typesafe.sbt.jse.SbtJsTask.autoImport.JsTaskKeys._
 import com.typesafe.sbt.web.Import.WebKeys._
 import com.typesafe.sbt.web.SbtWeb.autoImport._
-import com.typesafe.sbt.web.js.JavaScript
+import com.typesafe.sbt.web.js.{JS, JavaScript}
+import io.alphard.sbt.SbtNpm.autoImport._
+import io.alphard.sbt._
 import io.noplay.sbt.web.require.SbtRequire
 import io.noplay.sbt.web.require.SbtRequire.autoImport._
 import sbt.Keys._
 import sbt._
 
-
 object SbtNunjucks
   extends AutoPlugin {
 
-  override val requires = SbtRequire
+  override val requires = SbtNpm && SbtJsTask && SbtRequire
+
+  override val trigger = AllRequirements
 
   object autoImport {
     val nunjucksVersion = settingKey[String]("Nunjucks version")
-    val nunjucksSlim = settingKey[Boolean]("Nunjucks slim")
+    val nunjucksPrecompile = settingKey[Boolean]("Nunjucks precompile")
+    val nunjucksIncludeFilter = settingKey[FileFilter]("Nunjucks include filter")
+    val nunjucksExcludeFilter = settingKey[FileFilter]("Nunjucks exclude filter")
+    val nunjucksOptions = settingKey[JS.Object]("Nunjucks precompile options")
+    val nunjucks = taskKey[Seq[File]]("Nunjucks compile templates")
   }
 
   import SbtNunjucks.autoImport._
 
+  override lazy val buildSettings =
+    inTask(nunjucks)(
+      SbtJsTask.jsTaskSpecificUnscopedBuildSettings ++
+        Seq(
+          moduleName := "nunjucks",
+          shellFile := getClass.getResource("/io/noplay/sbt/web/nunjucks/nunjucks.js")
+        )
+    )
+
   override lazy val projectSettings = Seq(
     nunjucksVersion := "2.4.2",
-    nunjucksSlim := false,
-    libraryDependencies += ("org.webjars.npm" % "nunjucks" % nunjucksVersion.value).intransitive()
-  ) ++ inConfig(Assets)(unscopedSettings) ++ inConfig(TestAssets)(unscopedSettings)
+    nunjucksPrecompile := false,
+    nunjucksOptions := JS.Object.empty,
+    libraryDependencies += ("org.webjars.npm" % "nunjucks" % nunjucksVersion.value).intransitive(),
+    npmDevDependencies ++= Seq(
+      "mkdirp" -> ">=0.5.1",
+      "nunjucks" -> nunjucksVersion.value
+    )
+  ) ++
+    inConfig(Assets)(unscopedSettings) ++
+    inConfig(TestAssets)(unscopedSettings) ++
+    inTask(nunjucks)(
+      SbtJsTask.jsTaskSpecificUnscopedProjectSettings ++
+        inConfig(Assets)(nunjucksUnscopedSettings) ++
+        inConfig(TestAssets)(nunjucksUnscopedSettings) ++ Seq(
+        taskMessage in Assets := s"Nunjucks ${if (nunjucksPrecompile.value) "precompiling" else "copying"}",
+        taskMessage in TestAssets := s"Nunjucks test ${if (nunjucksPrecompile.value) "precompiling" else "copying"}"
+      )
+    ) ++ SbtJsTask.addJsSourceFileTasks(nunjucks) ++ Seq(
+    nunjucks in Assets := {
+      if (nunjucksPrecompile.value) (
+        nunjucks in Assets).dependsOn(nodeModules in Assets).value
+      else
+        Def.task[Seq[File]](Seq.empty).value
+    },
+    nunjucks in TestAssets := {
+      if (nunjucksPrecompile.value) (
+        nunjucks in TestAssets).dependsOn(nodeModules in TestAssets).value
+      else
+        Def.task[Seq[File]](Seq.empty).value
+    },
+    nodeModuleDirectories in Plugin += npmModulesDirectory.value
+  )
+
+  private lazy val nunjucksUnscopedSettings = Seq(
+    includeFilter <<= nunjucksIncludeFilter,
+    excludeFilter <<= nunjucksExcludeFilter,
+    jsOptions := nunjucksOptions.value.js
+  )
 
   private lazy val unscopedSettings = Seq(
-    requireMainConfigPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}",
-    requireMainConfigMinifiedPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}.min",
-    requireMainConfigCDNPaths += "nunjucks" -> s"//cdnjs.cloudflare.com/ajax/libs/nunjucks/${nunjucksVersion.value}/nunjucks${if (nunjucksSlim.value) "-slim" else ""}.min",
+    nunjucksIncludeFilter := "*.njk",
+    nunjucksExcludeFilter := NothingFilter,
+    excludeFilter := {
+      if (nunjucksPrecompile.value)
+        excludeFilter.value || nunjucksIncludeFilter.value
+      else
+        excludeFilter.value
+    },
+    requireMainConfigPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}",
+    requireMainConfigMinifiedPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}.min",
+    requireMainConfigCDNPaths += "nunjucks" -> s"//cdnjs.cloudflare.com/ajax/libs/nunjucks/${nunjucksVersion.value}/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}.min",
     requireMainConfigShim += "nunjucks" -> RequireShimConfig(
       deps = Seq("module"),
       init = Some(

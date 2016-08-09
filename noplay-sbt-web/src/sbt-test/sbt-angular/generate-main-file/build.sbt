@@ -1,5 +1,5 @@
 lazy val root = (project in file(".")).enablePlugins(SbtAngular).settings(
-  requireConfigurationPaths in Assets += "index" -> "index",
+  requireMainConfigPaths in Assets += "index" -> "index",
   requireCallbackModule in Assets := "index",
   requireConfigurationPaths in TestAssets += "index" -> "index",
   requireCallbackModule in TestAssets := "index",
