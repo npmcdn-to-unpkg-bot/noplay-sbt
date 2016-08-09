@@ -36,8 +36,6 @@ import sbt._
 object SbtRequire
   extends AutoPlugin {
 
-  private val DefaultRequireMainTemplate = "/io/noplay/sbt/web/require/requirejs.js.ftl"
-
   override val requires = SbtNpm && SbtWebIndex && SbtJsTask
 
   object autoImport {
@@ -95,13 +93,15 @@ object SbtRequire
     val requireMinified = settingKey[Boolean]("If true the minified versions of modules in paths are used")
     val requireCDN = settingKey[Boolean]("If true the CDN versions of modules in paths are used")
     val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
-    val requireIncludeFilter = settingKey[FileFilter]("The include filter generated from paths")
-    val requireExcludeFilter = settingKey[FileFilter]("The exclude filter generated from paths")
 
     //////////
     // MAIN //
     //////////
 
+    // http://requirejs.org/docs/api.html#config
+
+    val requireMainIncludeFilter = settingKey[FileFilter]("The main include filter generated from paths")
+    val requireMainExcludeFilter = settingKey[FileFilter]("The main exclude filter generated from paths")
     val requireMainDirectory = settingKey[File]("The main file directory")
     val requireMainConfigBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
     val requireMainConfigPaths = settingKey[RequirePaths](
@@ -198,6 +198,10 @@ object SbtRequire
     // BUILD //
     ///////////
 
+    // http://requirejs.org/docs/optimization.html
+
+    val requireBuildIncludeFilter = settingKey[FileFilter]("The require build include filter generated from paths")
+    val requireBuildExcludeFilter = settingKey[FileFilter]("The require build exclude filter generated from paths")
     val requireBuildDirectory = settingKey[File]("The require build directory")
     var requireBuildOptimizer = settingKey[RequireOptimizer]("The require optimizer to use: Uglify, Uglify2, Closure")
     val requireBuildConfigAppDir = settingKey[File](
@@ -594,335 +598,6 @@ object SbtRequire
     val requireBuildConfig = settingKey[JS.Object]("The rjs build config")
     val requireBuildFile = settingKey[File]("The rjs build file")
     val requireBuildStage = taskKey[Pipeline.Stage]("Perform RequireJs optimization on the asset pipeline.")
-
-    lazy val unscopedProjectSettings = Seq(
-
-      requireIncludeFilter := {
-        val paths = requireMainConfigPaths.value.map(_._2)
-        new SimpleFileFilter({
-          case file if file.isFile =>
-            val path = file.getAbsolutePath.replace('\\', '/')
-            (false /: paths) (_ || path.contains(_))
-          case _ =>
-            false
-        })
-      },
-      requireExcludeFilter := NothingFilter,
-
-      //////////
-      // MAIN //
-      //////////
-
-      requireMainDirectory := sourceManaged.value / "requirejs",
-      requireMainConfigBaseUrl := None,
-      requireMainConfigPaths := Seq(
-        requireMainModule.value -> RequirePath.minify(requireMainModule.value, requireMinified.value)
-      ),
-      requireMainConfigMinifiedPaths := Seq.empty,
-      requireMainConfigCDNPaths := Seq.empty,
-      requireMainConfigBundles := Nil,
-      requireMainConfigShim := Nil,
-      requireMainConfigMap := Nil,
-      requireMainConfigConfig := Nil,
-      requireMainConfigPackages := Nil,
-      requireMainConfigNodeIdCompat := false,
-      requireMainConfigWaitSeconds := 7,
-      requireMainConfigContext := None,
-      requireMainConfigDeps := Nil,
-      requireMainConfigCallback := Some(
-        JavaScript(s"""function() { require(['${requireMainIndexModule.value}']); }""")
-      ),
-      requireMainConfigEnforceDefine := false,
-      requireMainConfigXhtml := false,
-      requireMainConfigUrlArgs := None,
-      requireMainConfigScriptType := "text/javascript",
-      requireMainConfigSkipDataMain := false,
-      requireMainConfig := JS.Object(
-        "baseUrl" -> requireMainConfigBaseUrl.value,
-        "paths" -> {
-          val paths = requireMainConfigPaths.value ++
-            (if (requireMinified.value) requireMainConfigMinifiedPaths.value else Seq.empty) ++
-            (if (requireCDN.value) requireMainConfigCDNPaths.value else Seq.empty)
-          JS.Object(
-            paths.map {
-              case (id, path) =>
-                id -> JS(path)
-            }: _*
-          )
-        },
-        "bundles" -> JS.Object(requireMainConfigBundles.value.map {
-          case (id, bundle) =>
-            id -> JS(bundle)
-        }: _*),
-        "shim" -> JS.Object(requireMainConfigShim.value.map {
-          case (id, RequireShimConfig(deps, exports, init)) =>
-            id -> JS.Object(
-              "deps" -> deps,
-              "exports" -> exports,
-              "init" -> init
-            )
-        }: _*),
-        "map" -> requireMainConfigMap.value.groupBy(_._1).toSeq.map {
-          case (k, v) =>
-            k -> v.unzip._2.reduce(_ ++ _)
-        },
-        "config" -> JS.Object(requireMainConfigConfig.value: _*),
-        "packages" -> requireMainConfigPackages.value.map {
-          case (id, _package) =>
-            id -> JS.Object(
-              "name" -> _package.name,
-              "main" -> _package.main
-            )
-        },
-        "nodeIdCompat" -> requireMainConfigNodeIdCompat.value,
-        "waitSeconds" -> requireMainConfigWaitSeconds.value,
-        "context" -> requireMainConfigContext.value,
-        "deps" -> requireMainConfigDeps.value,
-        "callback" -> requireMainConfigCallback.value,
-        "enforceDefine" -> requireMainConfigEnforceDefine.value,
-        "xhtml" -> requireMainConfigXhtml.value,
-        "urlArgs" -> requireMainConfigUrlArgs.value,
-        "scriptType" -> requireMainConfigScriptType.value,
-        "skipDataMain" -> requireMainConfigSkipDataMain.value
-      ),
-      requireMainModule := "main",
-      requireMainPath := RequirePath.minify(
-        requireMainConfigBaseUrl.value.getOrElse("") + "/" + requireMainModule.value,
-        requireMinified.value
-      ),
-      requireMainFile := requireMainDirectory.value / RequirePath.filename(RequirePath.relativize(requireMainPath.value)),
-      requireMainTemplateFile := None,
-      requireMainGenerator := {
-        implicit val logger = streams.value.log
-        val configuration = requireMainConfig.value.js
-        val moduleId = requireMainIndexModule.value
-        val mainTemplate = requireMainTemplateFile.value.map(IO.read(_)) getOrElse {
-          IO.readStream(getClass.getResource(DefaultRequireMainTemplate).openStream())
-        }
-        val mainFile = requireMainFile.value
-        if (!mainFile.exists()) {
-          mainFile.getParentFile.mkdirs()
-          mainFile.createNewFile()
-        }
-        IO.write(
-          mainFile,
-          io.alphard.sbt.util.FreeMarker.render(
-            mainTemplate,
-            Map(
-              "configuration" -> configuration,
-              "moduleId" -> moduleId
-            )
-          )
-        )
-        Seq(mainFile)
-      },
-      includeFilter := includeFilter.value || requireIncludeFilter.value,
-      excludeFilter := excludeFilter.value || requireExcludeFilter.value,
-      managedSourceDirectories <+= requireMainDirectory,
-      sourceGenerators <+= requireMainGenerator,
-      webIndexScripts ++= Seq[Script](
-        SbtWebIndex.autoImport.Script(
-          requirePath.value,
-          async = true,
-          attributes = Map("data-main" -> RequirePath.filename(requireMainPath.value))
-        )
-      ),
-
-      ///////////
-      // BUILD //
-      ///////////
-
-      requireBuildDirectory := target.value / "requirejs",
-      requireBuildOptimizer := RequireOptimizer.Uglify2(),
-      requireBuildConfigAppDir := requireBuildDirectory.value / "stage",
-      requireBuildConfigBaseUrl <<= requireMainConfigBaseUrl,
-      requireBuildConfigMainConfigFiles := Seq(
-        requireBuildConfigAppDir.value / RequirePath.filename(requireMainPath.value)
-      ),
-      requireBuildConfigPaths := requireMainConfigPaths.value map {
-        case (id, path) if path.indexOf("//") >= 0 => // do not optimize external path such as CDN urls
-          (id, "empty:")
-        case (id, path) if path.startsWith("/") => // rebase absolute path to app dir
-          (id, (requireBuildConfigAppDir.value / RequirePath.relativize(path)).getAbsolutePath)
-        case (id, path) =>
-          (id, path)
-      },
-      requireBuildConfigMap <<= requireMainConfigMap,
-      requireBuildConfigPackages <<= requireMainConfigPackages,
-      requireBuildConfigDir := requireBuildDirectory.value / "build",
-      requireBuildConfigKeepBuildDir := false,
-      requireBuildConfigShim <<= requireMainConfigShim,
-      requireBuildConfigWrapShim := false,
-      requireBuildConfigLocale := None,
-      requireBuildConfigSkipDirOptimize := false,
-      requireBuildConfigGenerateSourceMaps := true,
-      requireBuildConfigNormalizeDefines := RequireNormalizeDefines.Skip,
-      requireBuildConfigOptimizeCss := RequireOptimizeCss.Standard(),
-      requireBuildConfigCssImportIgnore := Seq.empty,
-      requireBuildConfigCssPrefix := None,
-      requireBuildConfigInlineText := true,
-      requireBuildConfigUseStrict := false,
-      requireBuildConfigNamespace := None,
-      requireBuildConfigSkipModuleInsertion := false,
-      requireBuildConfigStubModules := Seq.empty,
-      requireBuildConfigOptimizeAllPluginResources := false,
-      requireBuildConfigFindNestedDependencies := false,
-      requireBuildConfigRemoveCombined := true,
-      requireBuildConfigModules := Seq.empty,
-      requireBuildConfigPreserveLicenseComments := false,
-      requireBuildConfigLogLevel := RequireLogLevel.Trace,
-      requireBuildConfigOnBuildRead := None,
-      requireBuildConfigOnBuildWrite := None,
-      requireBuildConfigOnModuleBundleComplete := None,
-      requireBuildConfigRawText := Seq.empty,
-      requireBuildConfigCjsTranslate := false,
-      requireBuildConfigUseSourceUrl := false,
-      requireBuildConfigWaitSeconds <<= requireMainConfigWaitSeconds,
-      requireBuildConfigSkipSemiColonInsertion := false,
-      requireBuildConfigKeepAmdefine := false,
-      requireBuildConfigAllowSourceOverwrites := false,
-      requireBuildConfigWriteBuildTxt := false,
-      requireBuildConfig := JS.Object(
-        "appDir" -> requireBuildConfigAppDir.value.getAbsolutePath,
-        "baseUrl" -> requireBuildConfigBaseUrl.value.map {
-          case baseUrl if baseUrl.startsWith("/") =>
-            (requireBuildConfigAppDir.value / RequirePath.relativize(baseUrl)).getAbsolutePath
-          case baseUrl =>
-            baseUrl
-        },
-        "mainConfigFile" -> requireBuildConfigMainConfigFiles.value,
-        "paths" -> JS.Object(requireBuildConfigPaths.value.map {
-          case (id, path) =>
-            id -> JS(path)
-        }: _*
-        ),
-        "map" -> requireBuildConfigMap.value.groupBy(_._1).toSeq.map {
-          case (k, v) =>
-            k -> v.unzip._2.reduce(_ ++ _)
-        },
-        "packages" -> requireBuildConfigPackages.value.map {
-          case (id, _package) =>
-            id -> JS.Object(
-              "name" -> _package.name,
-              "main" -> _package.main
-            )
-        },
-        "dir" -> requireBuildConfigDir.value,
-        "keepBuildDir" -> requireBuildConfigKeepBuildDir.value,
-        "shim" -> JS.Object(requireBuildConfigShim.value.map {
-          case (id, RequireShimConfig(deps, exports, init)) =>
-            id -> JS.Object(
-              "deps" -> deps,
-              "exports" -> exports,
-              "init" -> init
-            )
-        }: _*),
-        "wrapShim" -> requireBuildConfigWrapShim.value,
-        "locale" -> requireBuildConfigLocale.value,
-        "generateSourceMaps" -> requireBuildConfigGenerateSourceMaps.value,
-        "normalizeDirDefines" -> (requireBuildConfigNormalizeDefines.value match {
-          case RequireNormalizeDefines.All => "all"
-          case RequireNormalizeDefines.Skip => "skip"
-        }),
-        "optimizeCss" -> (requireBuildConfigOptimizeCss.value match {
-          case RequireOptimizeCss.None => "none"
-          case RequireOptimizeCss.Standard(keepLines, keepComments, keepWhitespace) =>
-            "standard" +
-              (if (keepLines) ".keepLines" else "") +
-              (if (keepComments) ".keepComments" else "") +
-              (if (keepWhitespace) ".keepWhitespace" else "")
-        }),
-        "cssImportIgnore" -> requireBuildConfigCssImportIgnore.value.mkString(","),
-        "cssPrefix" -> requireBuildConfigCssPrefix.value,
-        "useStrict" -> requireBuildConfigUseStrict.value,
-        "namespace" -> requireBuildConfigNamespace.value,
-        "skipModuleInsertion" -> requireBuildConfigSkipModuleInsertion.value,
-        "stubModules" -> requireBuildConfigStubModules.value,
-        "optimizeAllPluginResources" -> requireBuildConfigOptimizeAllPluginResources.value,
-        "findNestedDependencies" -> requireBuildConfigFindNestedDependencies.value,
-        "removeCombined" -> requireBuildConfigRemoveCombined.value,
-        "modules" -> requireBuildConfigModules.value,
-        "preserveLicenseComments" -> requireBuildConfigPreserveLicenseComments.value,
-        "logLevel" -> (requireBuildConfigLogLevel.value match {
-          case RequireLogLevel.Trace => 0
-          case RequireLogLevel.Info => 1
-          case RequireLogLevel.Warn => 2
-          case RequireLogLevel.Error => 3
-          case RequireLogLevel.Silent => 4
-        }),
-        "onBuildRead" -> requireBuildConfigOnBuildRead.value,
-        "onBuildWrite" -> requireBuildConfigOnBuildWrite.value,
-        "onModuleBundleComplete" -> requireBuildConfigOnModuleBundleComplete.value,
-        "rawText" -> requireBuildConfigRawText.value.map {
-          case (id, javascript) =>
-            id -> javascript
-        },
-        "cjsTranslate" -> requireBuildConfigCjsTranslate.value,
-        "useSourceUrl" -> requireBuildConfigUseSourceUrl.value,
-        "waitSeconds" -> requireBuildConfigWaitSeconds.value,
-        "skipSemiColonInsertion" -> requireBuildConfigSkipSemiColonInsertion.value,
-        "keepAmdefine" -> requireBuildConfigKeepAmdefine.value,
-        "allowSourceOverwrites" -> requireBuildConfigAllowSourceOverwrites.value,
-        "writeBuildTxt" -> requireBuildConfigWriteBuildTxt.value
-      ) ++ {
-        requireBuildOptimizer.value match {
-          case RequireOptimizer.Uglify(config) =>
-            JS.Object(
-              "optimize" -> "uglify",
-              "uglify" -> config
-            )
-          case RequireOptimizer.Uglify2(config) =>
-            JS.Object(
-              "optimize" -> "uglify2",
-              "uglify2" -> config
-            )
-          case RequireOptimizer.Closure(config) =>
-            JS.Object(
-              "optimize" -> "closure",
-              "closure" -> config
-            )
-        }
-      },
-      requireBuildFile := requireBuildDirectory.value / "build.js",
-      requireBuildStage := Def.task[Pipeline.Stage] {
-        mappings =>
-          val include = requireIncludeFilter.value
-          val exclude = requireExcludeFilter.value
-
-          val optimizerMappings = mappings.filter(f => !f._1.isDirectory && include.accept(f._1) && !exclude.accept(f._1))
-
-          SbtWeb.syncMappings(
-            streams.value.cacheDirectory,
-            "rjs-sync",
-            optimizerMappings,
-            requireBuildConfigAppDir.value
-          )
-
-          IO.write(requireBuildFile.value, requireBuildConfig.value.js, Charset.forName("UTF-8"))
-
-          val cacheDirectory = streams.value.cacheDirectory / "rjs-cache"
-          val runUpdate = FileFunction.cached(cacheDirectory, FilesInfo.hash) {
-            _ =>
-              streams.value.log.info("Optimizing JavaScript with RequireJS")
-
-              SbtJsTask.executeJs(
-                state.value,
-                (JsEngineKeys.engineType in requireBuildStage).value,
-                (JsEngineKeys.command in requireBuildStage).value,
-                Nil,
-                npmModulesDirectory.value / "requirejs" / "bin" / "r.js",
-                Seq("-o", requireBuildFile.value.getAbsolutePath),
-                (JsTaskKeys.timeoutPerSource in requireBuildStage).value * optimizerMappings.size
-              )
-
-              requireBuildConfigDir.value.***.get.toSet
-          }
-
-          val optimizedMappings = runUpdate(requireBuildConfigAppDir.value.***.get.toSet).filter(_.isFile).pair(relativeTo(requireBuildConfigDir.value))
-          (mappings.toSet -- optimizerMappings.toSet ++ optimizedMappings).toSeq
-      }.dependsOn(webJarsNodeModules in Plugin).value,
-      pipelineStages ++= (if ((requireOptimized in Assets).value) Seq(requireBuildStage) else Nil)
-    )
   }
 
   import SbtRequire.autoImport._
@@ -938,12 +613,333 @@ object SbtRequire
           s"/${webModulesLib.value}/requirejs/require"
         RequirePath.filename(RequirePath.minify(path, requireMinified.value))
       },
-      requireOptimized := true,
-      requireMinified := true,
-      requireCDN := true,
+      requireOptimized := false,
+      requireMinified := false,
+      requireCDN := false,
       npmDevDependencies += "requirejs" -> requireVersion.value,
       libraryDependencies ++= Seq(
         "org.webjars" % "requirejs" % requireVersion.value
       )
     )
+
+  private lazy val unscopedProjectSettings = Seq(
+
+    //////////
+    // MAIN //
+    //////////
+
+    requireMainIncludeFilter := AllPassFilter,
+    requireMainExcludeFilter := NothingFilter,
+    requireMainDirectory := sourceManaged.value / "requirejs",
+    requireMainConfigBaseUrl := None,
+    requireMainConfigPaths := Seq(
+      requireMainModule.value -> RequirePath.minify(requireMainModule.value, requireMinified.value)
+    ),
+    requireMainConfigMinifiedPaths := Seq.empty,
+    requireMainConfigCDNPaths := Seq.empty,
+    requireMainConfigBundles := Nil,
+    requireMainConfigShim := Nil,
+    requireMainConfigMap := Nil,
+    requireMainConfigConfig := Nil,
+    requireMainConfigPackages := Nil,
+    requireMainConfigNodeIdCompat := false,
+    requireMainConfigWaitSeconds := 7,
+    requireMainConfigContext := None,
+    requireMainConfigDeps := Nil,
+    requireMainConfigCallback := Some(
+      JavaScript(s"""function() { require(['${requireMainIndexModule.value}']); }""")
+    ),
+    requireMainConfigEnforceDefine := false,
+    requireMainConfigXhtml := false,
+    requireMainConfigUrlArgs := None,
+    requireMainConfigScriptType := "text/javascript",
+    requireMainConfigSkipDataMain := false,
+    requireMainConfig := JS.Object(
+      "baseUrl" -> requireMainConfigBaseUrl.value,
+      "paths" -> {
+        val paths = requireMainConfigPaths.value ++
+          (if (requireMinified.value) requireMainConfigMinifiedPaths.value else Seq.empty) ++
+          (if (requireCDN.value) requireMainConfigCDNPaths.value else Seq.empty)
+        JS.Object(
+          paths.map {
+            case (id, path) =>
+              id -> JS(path)
+          }: _*
+        )
+      },
+      "bundles" -> JS.Object(requireMainConfigBundles.value.map {
+        case (id, bundle) =>
+          id -> JS(bundle)
+      }: _*),
+      "shim" -> JS.Object(requireMainConfigShim.value.map {
+        case (id, RequireShimConfig(deps, exports, init)) =>
+          id -> JS.Object(
+            "deps" -> deps,
+            "exports" -> exports,
+            "init" -> init
+          )
+      }: _*),
+      "map" -> requireMainConfigMap.value.groupBy(_._1).toSeq.map {
+        case (k, v) =>
+          k -> v.unzip._2.reduce(_ ++ _)
+      },
+      "config" -> JS.Object(requireMainConfigConfig.value: _*),
+      "packages" -> requireMainConfigPackages.value.map {
+        case (id, _package) =>
+          id -> JS.Object(
+            "name" -> _package.name,
+            "main" -> _package.main
+          )
+      },
+      "nodeIdCompat" -> requireMainConfigNodeIdCompat.value,
+      "waitSeconds" -> requireMainConfigWaitSeconds.value,
+      "context" -> requireMainConfigContext.value,
+      "deps" -> requireMainConfigDeps.value,
+      "callback" -> requireMainConfigCallback.value,
+      "enforceDefine" -> requireMainConfigEnforceDefine.value,
+      "xhtml" -> requireMainConfigXhtml.value,
+      "urlArgs" -> requireMainConfigUrlArgs.value,
+      "scriptType" -> requireMainConfigScriptType.value,
+      "skipDataMain" -> requireMainConfigSkipDataMain.value
+    ),
+    requireMainModule := "main",
+    requireMainPath := RequirePath.minify(
+      requireMainConfigBaseUrl.value.getOrElse("") + "/" + requireMainModule.value,
+      requireMinified.value
+    ),
+    requireMainFile := requireMainDirectory.value / RequirePath.filename(RequirePath.relativize(requireMainPath.value)),
+    requireMainTemplateFile := None,
+    requireMainGenerator := {
+      implicit val logger = streams.value.log
+      val configuration = requireMainConfig.value.js
+      val moduleId = requireMainIndexModule.value
+      val mainTemplate = requireMainTemplateFile.value.map(IO.read(_)) getOrElse {
+        IO.readStream(getClass.getResource("/io/noplay/sbt/web/require/requirejs.js.ftl").openStream())
+      }
+      val mainFile = requireMainFile.value
+      if (!mainFile.exists()) {
+        mainFile.getParentFile.mkdirs()
+        mainFile.createNewFile()
+      }
+      IO.write(
+        mainFile,
+        io.alphard.sbt.util.FreeMarker.render(
+          mainTemplate,
+          Map(
+            "configuration" -> configuration,
+            "moduleId" -> moduleId
+          )
+        )
+      )
+      Seq(mainFile)
+    },
+    includeFilter := includeFilter.value || requireMainIncludeFilter.value,
+    excludeFilter := excludeFilter.value || requireMainExcludeFilter.value,
+    managedSourceDirectories <+= requireMainDirectory,
+    sourceGenerators <+= requireMainGenerator,
+    webIndexScripts ++= Seq[Script](
+      SbtWebIndex.autoImport.Script(
+        requirePath.value,
+        async = true,
+        attributes = Map("data-main" -> RequirePath.filename(requireMainPath.value))
+      )
+    ),
+
+    ///////////
+    // BUILD //
+    ///////////
+
+    requireBuildIncludeFilter := AllPassFilter,
+    requireBuildExcludeFilter := NothingFilter,
+    requireBuildDirectory := target.value / "requirejs",
+    requireBuildOptimizer := RequireOptimizer.Uglify2(),
+    requireBuildConfigAppDir := requireBuildDirectory.value / "stage",
+    requireBuildConfigBaseUrl <<= requireMainConfigBaseUrl,
+    requireBuildConfigMainConfigFiles := Seq(
+      requireBuildConfigAppDir.value / RequirePath.filename(requireMainPath.value)
+    ),
+    requireBuildConfigPaths := requireMainConfigPaths.value map {
+      case (id, path) if path.indexOf("//") >= 0 => // do not optimize external path such as CDN urls
+        (id, "empty:")
+      case (id, path) if path.startsWith("/") => // rebase absolute path to app dir
+        (id, (requireBuildConfigAppDir.value / RequirePath.relativize(path)).getAbsolutePath)
+      case (id, path) =>
+        (id, path)
+    },
+    requireBuildConfigMap <<= requireMainConfigMap,
+    requireBuildConfigPackages <<= requireMainConfigPackages,
+    requireBuildConfigDir := requireBuildDirectory.value / "build",
+    requireBuildConfigKeepBuildDir := false,
+    requireBuildConfigShim <<= requireMainConfigShim,
+    requireBuildConfigWrapShim := false,
+    requireBuildConfigLocale := None,
+    requireBuildConfigSkipDirOptimize := false,
+    requireBuildConfigGenerateSourceMaps := true,
+    requireBuildConfigNormalizeDefines := RequireNormalizeDefines.Skip,
+    requireBuildConfigOptimizeCss := RequireOptimizeCss.Standard(),
+    requireBuildConfigCssImportIgnore := Seq.empty,
+    requireBuildConfigCssPrefix := None,
+    requireBuildConfigInlineText := true,
+    requireBuildConfigUseStrict := false,
+    requireBuildConfigNamespace := None,
+    requireBuildConfigSkipModuleInsertion := false,
+    requireBuildConfigStubModules := Seq.empty,
+    requireBuildConfigOptimizeAllPluginResources := false,
+    requireBuildConfigFindNestedDependencies := false,
+    requireBuildConfigRemoveCombined := true,
+    requireBuildConfigModules := Seq.empty,
+    requireBuildConfigPreserveLicenseComments := false,
+    requireBuildConfigLogLevel := RequireLogLevel.Trace,
+    requireBuildConfigOnBuildRead := None,
+    requireBuildConfigOnBuildWrite := None,
+    requireBuildConfigOnModuleBundleComplete := None,
+    requireBuildConfigRawText := Seq.empty,
+    requireBuildConfigCjsTranslate := false,
+    requireBuildConfigUseSourceUrl := false,
+    requireBuildConfigWaitSeconds <<= requireMainConfigWaitSeconds,
+    requireBuildConfigSkipSemiColonInsertion := false,
+    requireBuildConfigKeepAmdefine := false,
+    requireBuildConfigAllowSourceOverwrites := false,
+    requireBuildConfigWriteBuildTxt := false,
+    requireBuildConfig := JS.Object(
+      "appDir" -> requireBuildConfigAppDir.value.getAbsolutePath,
+      "baseUrl" -> requireBuildConfigBaseUrl.value.map {
+        case baseUrl if baseUrl.startsWith("/") =>
+          (requireBuildConfigAppDir.value / RequirePath.relativize(baseUrl)).getAbsolutePath
+        case baseUrl =>
+          baseUrl
+      },
+      "mainConfigFile" -> requireBuildConfigMainConfigFiles.value,
+      "paths" -> JS.Object(requireBuildConfigPaths.value.map {
+        case (id, path) =>
+          id -> JS(path)
+      }: _*
+      ),
+      "map" -> requireBuildConfigMap.value.groupBy(_._1).toSeq.map {
+        case (k, v) =>
+          k -> v.unzip._2.reduce(_ ++ _)
+      },
+      "packages" -> requireBuildConfigPackages.value.map {
+        case (id, _package) =>
+          id -> JS.Object(
+            "name" -> _package.name,
+            "main" -> _package.main
+          )
+      },
+      "dir" -> requireBuildConfigDir.value,
+      "keepBuildDir" -> requireBuildConfigKeepBuildDir.value,
+      "shim" -> JS.Object(requireBuildConfigShim.value.map {
+        case (id, RequireShimConfig(deps, exports, init)) =>
+          id -> JS.Object(
+            "deps" -> deps,
+            "exports" -> exports,
+            "init" -> init
+          )
+      }: _*),
+      "wrapShim" -> requireBuildConfigWrapShim.value,
+      "locale" -> requireBuildConfigLocale.value,
+      "generateSourceMaps" -> requireBuildConfigGenerateSourceMaps.value,
+      "normalizeDirDefines" -> (requireBuildConfigNormalizeDefines.value match {
+        case RequireNormalizeDefines.All => "all"
+        case RequireNormalizeDefines.Skip => "skip"
+      }),
+      "optimizeCss" -> (requireBuildConfigOptimizeCss.value match {
+        case RequireOptimizeCss.None => "none"
+        case RequireOptimizeCss.Standard(keepLines, keepComments, keepWhitespace) =>
+          "standard" +
+            (if (keepLines) ".keepLines" else "") +
+            (if (keepComments) ".keepComments" else "") +
+            (if (keepWhitespace) ".keepWhitespace" else "")
+      }),
+      "cssImportIgnore" -> requireBuildConfigCssImportIgnore.value.mkString(","),
+      "cssPrefix" -> requireBuildConfigCssPrefix.value,
+      "useStrict" -> requireBuildConfigUseStrict.value,
+      "namespace" -> requireBuildConfigNamespace.value,
+      "skipModuleInsertion" -> requireBuildConfigSkipModuleInsertion.value,
+      "stubModules" -> requireBuildConfigStubModules.value,
+      "optimizeAllPluginResources" -> requireBuildConfigOptimizeAllPluginResources.value,
+      "findNestedDependencies" -> requireBuildConfigFindNestedDependencies.value,
+      "removeCombined" -> requireBuildConfigRemoveCombined.value,
+      "modules" -> requireBuildConfigModules.value,
+      "preserveLicenseComments" -> requireBuildConfigPreserveLicenseComments.value,
+      "logLevel" -> (requireBuildConfigLogLevel.value match {
+        case RequireLogLevel.Trace => 0
+        case RequireLogLevel.Info => 1
+        case RequireLogLevel.Warn => 2
+        case RequireLogLevel.Error => 3
+        case RequireLogLevel.Silent => 4
+      }),
+      "onBuildRead" -> requireBuildConfigOnBuildRead.value,
+      "onBuildWrite" -> requireBuildConfigOnBuildWrite.value,
+      "onModuleBundleComplete" -> requireBuildConfigOnModuleBundleComplete.value,
+      "rawText" -> requireBuildConfigRawText.value.map {
+        case (id, javascript) =>
+          id -> javascript
+      },
+      "cjsTranslate" -> requireBuildConfigCjsTranslate.value,
+      "useSourceUrl" -> requireBuildConfigUseSourceUrl.value,
+      "waitSeconds" -> requireBuildConfigWaitSeconds.value,
+      "skipSemiColonInsertion" -> requireBuildConfigSkipSemiColonInsertion.value,
+      "keepAmdefine" -> requireBuildConfigKeepAmdefine.value,
+      "allowSourceOverwrites" -> requireBuildConfigAllowSourceOverwrites.value,
+      "writeBuildTxt" -> requireBuildConfigWriteBuildTxt.value
+    ) ++ {
+      requireBuildOptimizer.value match {
+        case RequireOptimizer.Uglify(config) =>
+          JS.Object(
+            "optimize" -> "uglify",
+            "uglify" -> config
+          )
+        case RequireOptimizer.Uglify2(config) =>
+          JS.Object(
+            "optimize" -> "uglify2",
+            "uglify2" -> config
+          )
+        case RequireOptimizer.Closure(config) =>
+          JS.Object(
+            "optimize" -> "closure",
+            "closure" -> config
+          )
+      }
+    },
+    requireBuildFile := requireBuildDirectory.value / "build.js",
+    requireBuildStage := Def.task[Pipeline.Stage] {
+      mappings =>
+        val include = requireBuildIncludeFilter.value
+        val exclude = requireBuildExcludeFilter.value
+
+        val optimizerMappings = mappings.filter(f => !f._1.isDirectory && include.accept(f._1) && !exclude.accept(f._1))
+
+        SbtWeb.syncMappings(
+          streams.value.cacheDirectory,
+          "rjs-sync",
+          optimizerMappings,
+          requireBuildConfigAppDir.value
+        )
+
+        IO.write(requireBuildFile.value, requireBuildConfig.value.js, Charset.forName("UTF-8"))
+
+        val cacheDirectory = streams.value.cacheDirectory / "rjs-cache"
+        val runUpdate = FileFunction.cached(cacheDirectory, FilesInfo.hash) {
+          _ =>
+            streams.value.log.info("Optimizing JavaScript with RequireJS")
+
+            SbtJsTask.executeJs(
+              state.value,
+              (JsEngineKeys.engineType in requireBuildStage).value,
+              (JsEngineKeys.command in requireBuildStage).value,
+              Nil,
+              npmModulesDirectory.value / "requirejs" / "bin" / "r.js",
+              Seq("-o", requireBuildFile.value.getAbsolutePath),
+              (JsTaskKeys.timeoutPerSource in requireBuildStage).value * optimizerMappings.size
+            )
+
+            requireBuildConfigDir.value.***.get.toSet
+        }
+
+        val optimizedMappings = runUpdate(requireBuildConfigAppDir.value.***.get.toSet).filter(_.isFile).pair(relativeTo(requireBuildConfigDir.value))
+        (mappings.toSet -- optimizerMappings.toSet ++ optimizedMappings).toSeq
+    }.dependsOn(webJarsNodeModules in Plugin).value,
+    pipelineStages ++= (if ((requireOptimized in Assets).value) Seq(requireBuildStage) else Nil)
+  )
 }

@@ -32,13 +32,15 @@ object SbtQ
 
   import SbtQ.autoImport._
 
-  val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "q" -> s"/${webModulesLib.value}/q/q",
-    requireMainConfigShim += "q" -> RequireShimConfig(exports = Some("Q"))
-  )
-
   override val projectSettings = Seq(
     qVersion := "1.4.1",
     libraryDependencies += "org.webjars.npm" % "q" % qVersion.value
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
+
+  private lazy val unscopedProjectSettings = Seq(
+    requireMainConfigPaths += "q" -> s"/${webModulesLib.value}/q/q",
+    //requireMainConfigMinifiedPaths += "q" -> s"/${webModulesLib.value}/q/q",
+    requireMainConfigCDNPaths += "q" -> s"//cdnjs.cloudflare.com/ajax/libs/q.js/${qVersion.value}/q.min",
+    requireMainConfigShim += "q" -> RequireShimConfig(exports = Some("Q"))
+  )
 }
