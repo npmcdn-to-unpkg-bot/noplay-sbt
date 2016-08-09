@@ -98,7 +98,11 @@ object SbtWebIndex
 
   import SbtWebIndex.autoImport._
 
-  lazy val unscopedProjectSettings: Seq[Setting[_]] = Seq(
+  override lazy val projectSettings =
+    inConfig(Assets)(unscopedProjectSettings) ++
+      inConfig(TestAssets)(unscopedProjectSettings)
+
+  private lazy val unscopedProjectSettings: Seq[Setting[_]] = Seq(
     webIndexName := "index.html",
     webIndexDirectory := target.value / "web-index",
     webIndexFile := webIndexDirectory.value / webIndexName.value,
@@ -178,10 +182,6 @@ object SbtWebIndex
     }.dependsOn(webModules, nodeModules).value,
     pipelineStages ++= Seq(webIndexStage)
   )
-
-  override lazy val projectSettings =
-    inConfig(Assets)(unscopedProjectSettings) ++
-      inConfig(TestAssets)(unscopedProjectSettings)
 
   private def generateAttributes(attributes: Seq[(String, String)]): String =
     attributes.map(a => " %s=\"%s\"".format(a._1, a._2)).mkString("")

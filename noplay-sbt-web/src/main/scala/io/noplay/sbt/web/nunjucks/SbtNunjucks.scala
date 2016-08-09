@@ -44,6 +44,8 @@ object SbtNunjucks
 
   private lazy val unscopedSettings = Seq(
     requireMainConfigPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}",
+    requireMainConfigMinifiedPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksSlim.value) "-slim" else ""}.min",
+    requireMainConfigCDNPaths += "nunjucks" -> s"//cdnjs.cloudflare.com/ajax/libs/nunjucks/${nunjucksVersion.value}/nunjucks${if (nunjucksSlim.value) "-slim" else ""}.min",
     requireMainConfigShim += "nunjucks" -> RequireShimConfig(
       deps = Seq("module"),
       init = Some(
