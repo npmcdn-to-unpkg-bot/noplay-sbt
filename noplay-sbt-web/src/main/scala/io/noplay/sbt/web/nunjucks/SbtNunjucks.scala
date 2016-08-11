@@ -36,9 +36,10 @@ object SbtNunjucks
 
   object autoImport {
     val nunjucksVersion = settingKey[String]("Nunjucks version")
-    val nunjucksPrecompile = settingKey[Boolean]("Nunjucks precompile")
     val nunjucksIncludeFilter = settingKey[FileFilter]("Nunjucks include filter")
     val nunjucksExcludeFilter = settingKey[FileFilter]("Nunjucks exclude filter")
+    val nunjucksPrecompile = settingKey[Boolean]("Nunjucks precompile")
+    val nunjucksBaseUrl = settingKey[Option[String]]("Nunjucks base url")
     val nunjucksOptions = settingKey[JS.Object]("Nunjucks precompile options")
     val nunjucks = taskKey[Seq[File]]("Nunjucks compile templates")
   }
@@ -92,12 +93,15 @@ object SbtNunjucks
   private lazy val nunjucksUnscopedSettings = Seq(
     includeFilter <<= nunjucksIncludeFilter,
     excludeFilter <<= nunjucksExcludeFilter,
-    jsOptions := nunjucksOptions.value.js
+    jsOptions := (nunjucksOptions.value ++ JS.Object(
+      "baseUrl" -> nunjucksBaseUrl.value
+    )).js
   )
 
   private lazy val unscopedSettings = Seq(
     nunjucksIncludeFilter := "*.njk",
     nunjucksExcludeFilter := NothingFilter,
+    nunjucksBaseUrl := requireMainConfigBaseUrl.value,
     excludeFilter := {
       if (nunjucksPrecompile.value)
         excludeFilter.value || nunjucksIncludeFilter.value
