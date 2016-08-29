@@ -1,6 +1,6 @@
 import sbt.Defaults._
 
-val alphardSbtVersion = "3.38.0-SNAPSHOT"
+val alphardSbtVersion = "3.38.0"
 val alphardSbtCore = "io.alphard" %% "alphard-sbt-core" % alphardSbtVersion
 val alphardSbtJvm = "io.alphard" %% "alphard-sbt-jvm" % alphardSbtVersion
 val alphardSbtWeb = "io.alphard" %% "alphard-sbt-web" % alphardSbtVersion
