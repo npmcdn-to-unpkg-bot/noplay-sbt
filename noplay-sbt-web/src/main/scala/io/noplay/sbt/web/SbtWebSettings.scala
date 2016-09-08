@@ -25,7 +25,6 @@ object SbtWebSettings
   override lazy val requires =
     SbtWeb &&
       SbtWebIndex &&
-      SbtRequire &&
       SbtWebServer &&
       SbtWebBrowser
 }
