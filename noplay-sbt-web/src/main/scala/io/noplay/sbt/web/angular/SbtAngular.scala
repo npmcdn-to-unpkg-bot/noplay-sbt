@@ -90,5 +90,5 @@ object SbtAngular
 
   private def module(name: String, version: String) = "org.webjars.npm" % name % version
 
-  private def path(libPath: String, name: String) = s"/$libPath/$name/$name"
+  private def path(libPath: String, name: String) = RequirePath(s"/$libPath/$name/$name")
 }

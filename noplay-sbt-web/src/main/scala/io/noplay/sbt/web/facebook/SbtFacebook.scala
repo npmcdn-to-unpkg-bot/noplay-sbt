@@ -33,7 +33,7 @@ object SbtFacebook
   import SbtFacebook.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "facebook" -> "//connect.facebook.net/en_US/sdk",
+    requireMainConfigPaths += "facebook" -> RequirePath("//connect.facebook.net/en_US/sdk"),
     requireMainConfigShim ++= Seq(
       "facebook" -> RequireShimConfig(
         deps = Seq("module"),

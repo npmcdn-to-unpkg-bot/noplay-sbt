@@ -34,7 +34,7 @@ object SbtAngularTranslate
 
   val unscopedProjectSettings = Seq(
     requireMainConfigPaths ++= Seq(
-      "angular-translate" -> s"/${webModulesLib.value}/angular-translate/dist/angular-translate",
+      "angular-translate" -> RequirePath(s"/${webModulesLib.value}/angular-translate/dist/angular-translate"),
       path(webModulesLib.value, "handler-log"),
       path(webModulesLib.value, "interpolation-messageformat"),
       path(webModulesLib.value, "loader-partial"),
@@ -73,5 +73,5 @@ object SbtAngularTranslate
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 
   private def path(libPath: String, suffix: String) =
-    s"angular-translate-$suffix" -> s"/$libPath/angular-translate/dist/angular-translate-$suffix/angular-translate-$suffix"
+    s"angular-translate-$suffix" -> RequirePath(s"/$libPath/angular-translate/dist/angular-translate-$suffix/angular-translate-$suffix")
 }

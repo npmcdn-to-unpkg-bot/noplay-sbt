@@ -33,7 +33,7 @@ object SbtAngularUiRouter
   import SbtAngularUiRouter.autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "angular-ui-router" -> s"/${webModulesLib.value}/angular-ui-router/release/angular-ui-router",
+    requireMainConfigPaths += "angular-ui-router" -> RequirePath(s"/${webModulesLib.value}/angular-ui-router/release/angular-ui-router"),
     requireMainConfigShim += "angular-ui-router" -> RequireShimConfig(
       Seq("angular"),
       init = Some(

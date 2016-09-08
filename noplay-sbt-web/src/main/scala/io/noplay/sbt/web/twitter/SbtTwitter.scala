@@ -26,7 +26,7 @@ object SbtTwitter
   override val requires = SbtRequire
 
   val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "twitter" -> "//platform.twitter.com",
+    requireMainConfigPaths += "twitter" -> RequirePath("//platform.twitter.com"),
     requireMainConfigShim ++= Seq(
       "twitter" -> RequireShimConfig(
         Seq(),

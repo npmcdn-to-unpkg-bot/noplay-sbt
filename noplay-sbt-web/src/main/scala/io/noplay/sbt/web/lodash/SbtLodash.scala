@@ -35,7 +35,7 @@ object SbtLodash
 
   val unscopedProjectSettings = Seq(
     requireMainConfigPaths ++= Seq(
-      "lodash" -> s"/${webModulesLib.value}/lodash/lodash"
+      "lodash" -> RequirePath(s"/${webModulesLib.value}/lodash/lodash")
     )
   )
 

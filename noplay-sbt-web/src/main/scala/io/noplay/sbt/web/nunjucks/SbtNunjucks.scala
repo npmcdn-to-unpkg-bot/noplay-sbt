@@ -108,9 +108,10 @@ object SbtNunjucks
       else
         excludeFilter.value
     },
-    requireMainConfigPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}",
-    requireMainConfigMinifiedPaths += "nunjucks" -> s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}.min",
-    requireMainConfigCDNPaths += "nunjucks" -> s"//cdnjs.cloudflare.com/ajax/libs/nunjucks/${nunjucksVersion.value}/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}.min",
+    requireMainConfigPaths += "nunjucks" -> RequirePath(
+      s"/${webModulesLib.value}/nunjucks/browser/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}",
+      s"//cdnjs.cloudflare.com/ajax/libs/nunjucks/${nunjucksVersion.value}/nunjucks${if (nunjucksPrecompile.value) "-slim" else ""}"
+    ).minify(".min"),
     requireMainConfigShim += "nunjucks" -> RequireShimConfig(
       deps = Seq("module"),
       init = Some(
@@ -122,7 +123,8 @@ object SbtNunjucks
               |}
           """.stripMargin
         )
-      )
+      ),
+      exports = Some("nunjucks")
     )
   )
 
