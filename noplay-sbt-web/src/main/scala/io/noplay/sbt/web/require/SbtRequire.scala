@@ -33,6 +33,8 @@ import io.noplay.sbt.web.SbtWebIndex.autoImport._
 import sbt.Keys._
 import sbt._
 
+import scala.language.implicitConversions
+
 object SbtRequire
   extends AutoPlugin {
 
@@ -41,12 +43,41 @@ object SbtRequire
   object autoImport {
 
     type RequireId = String
-    type RequirePath = String
+    final case class RequirePath(unminified: String, minified: Option[String] = None,
+                                 unminifiedCDN: Option[String] = None, minifiedCDN: Option[String] = None) {
+      def get(min: Boolean = false, cdn: Boolean = false): String = {
+        (min, cdn) match {
+          case (true, true) => minifiedCDN.orElse(unminifiedCDN).orElse(minified).getOrElse(unminified)
+          case (true, false) => minified.getOrElse(unminified)
+          case (false, true) => unminifiedCDN.getOrElse(unminified)
+          case (false, false) => unminified
+        }
+      }
+      def file(min: Boolean = false, cdn: Boolean = false): String = RequirePath.file(get(min, cdn))
+      def relative(): RequirePath =
+        RequirePath(
+          RequirePath.relative(unminified),
+          minified.map(p => RequirePath.relative(p)),
+          unminifiedCDN,
+          minifiedCDN
+        )
+      def minify(ext: String = RequirePath.DefaultMinifyExt): RequirePath = RequirePath(
+        unminified,
+        minified.orElse(Some(RequirePath.minify(unminified, ext))),
+        unminifiedCDN,
+        minifiedCDN.orElse(unminifiedCDN.map(p => RequirePath.minify(p, ext)))
+      )
+    }
 
     object RequirePath {
-      def minify(path: String, minified: Boolean = false) = path + (if (minified) ".min" else "")
-      def filename(path: String, extension: String = "js"): String = path + "." + extension
-      def relativize(path: String): String = if (path.startsWith("/")) path.substring(1) else path
+      val DefaultMinifyExt = ".min"
+      def apply(unminified: String, minified: String): RequirePath = RequirePath(unminified, Some(minified))
+      def apply(unminified: String, minified: String, unminifiedCDN: String, minifiedCDN: String): RequirePath =
+        RequirePath(unminified, Some(minified), Some(unminifiedCDN), Some(minifiedCDN))
+      def file(path: String, extension: String = ".js"): String = path + extension
+      def relative(path: String): String = if (path.startsWith("/") && !path.startsWith("//")) path.substring(1) else path
+      def minify(path: String, ext: String = DefaultMinifyExt): String = path + ext
+      implicit def stringToPath(unminified: String): RequirePath = RequirePath(unminified)
     }
 
     type RequirePaths = Seq[(RequireId, RequirePath)]
@@ -89,7 +120,7 @@ object SbtRequire
     type RequireRawText = Seq[(RequireId, JavaScript)]
 
     val requireVersion = settingKey[String]("The require js version")
-    val requirePath = settingKey[String]("The web jars require js path")
+    val requirePath = settingKey[RequirePath]("The web jars require js path")
     val requireMinified = settingKey[Boolean]("If true the minified versions of modules in paths are used")
     val requireCDN = settingKey[Boolean]("If true the CDN versions of modules in paths are used")
     val requireOptimized = settingKey[Boolean]("If true an r.js optimization state is added to the pipeline")
@@ -106,12 +137,6 @@ object SbtRequire
     val requireMainConfigBaseUrl = settingKey[Option[String]]("The root path to use for all module lookup")
     val requireMainConfigPaths = settingKey[RequirePaths](
       "The path mappings for module names not found directly under baseUrl"
-    )
-    val requireMainConfigMinifiedPaths = settingKey[RequirePaths](
-      "The minified path mappings for module names not found directly under baseUrl"
-    )
-    val requireMainConfigCDNPaths = settingKey[RequirePaths](
-      "The CDN path mappings for module names not found directly under baseUrl"
     )
     val requireMainConfigBundles = settingKey[RequireBundles](
       "The bundles allow configuring multiple module IDs to be found in another script"
@@ -188,7 +213,7 @@ object SbtRequire
     )
     val requireMainConfig = settingKey[JS.Object]("The full configuration object")
     val requireMainModule = settingKey[String]("The main module name")
-    val requireMainPath = settingKey[String]("The main file path")
+    val requireMainPath = settingKey[RequirePath]("The main file path")
     val requireMainFile = settingKey[File]("The main file")
     val requireMainTemplateFile = settingKey[Option[File]]("The main template file")
     val requireMainGenerator = taskKey[Seq[File]]("Generate the config file")
@@ -233,7 +258,7 @@ object SbtRequire
         |value's config take precedence over previous values in the array.
       """.stripMargin
     )
-    val requireBuildConfigPaths = settingKey[RequirePaths](
+    val requireBuildConfigPaths = settingKey[Seq[(RequireId, String)]](
       """Set paths for modules. If relative paths, set relative to baseUrl above.
         |If a special value of "empty:" is used for the path value, then that
         |acts like mapping the path to an empty file. It allows the optimizer to
@@ -603,26 +628,31 @@ object SbtRequire
   import SbtRequire.autoImport._
 
   override val projectSettings =
-    inConfig(Assets)(unscopedProjectSettings) ++
-      inConfig(TestAssets)(unscopedProjectSettings) ++ Seq(
+    Seq(
       requireVersion := "2.2.0",
-      requirePath := {
-        val path = if (requireCDN.value)
-          s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"
-        else
-          s"/${webModulesLib.value}/requirejs/require"
-        RequirePath.filename(RequirePath.minify(path, requireMinified.value))
-      },
       requireOptimized := false,
       requireMinified := false,
       requireCDN := false,
+      requirePath := {
+        RequirePath(
+          s"/${webModulesLib.value}/requirejs/require",
+          None,
+          Some(s"//cdn.jsdelivr.net/webjars/requirejs/${requireVersion.value}/require"),
+          None
+        ).minify()
+      },
       npmDevDependencies += "requirejs" -> requireVersion.value,
       libraryDependencies ++= Seq(
         "org.webjars" % "requirejs" % requireVersion.value
       )
-    )
+    ) ++ inConfig(Assets)(unscopedProjectSettings) ++
+      inConfig(TestAssets)(unscopedProjectSettings)
 
   private lazy val unscopedProjectSettings = Seq(
+
+    requireOptimized := requireOptimized.value,
+    requireMinified := requireMinified.value,
+    requireCDN := requireCDN.value,
 
     //////////
     // MAIN //
@@ -633,10 +663,8 @@ object SbtRequire
     requireMainDirectory := sourceManaged.value / "requirejs",
     requireMainConfigBaseUrl := None,
     requireMainConfigPaths := Seq(
-      requireMainModule.value -> RequirePath.minify(requireMainModule.value, requireMinified.value)
+      requireMainModule.value -> requireMainPath.value
     ),
-    requireMainConfigMinifiedPaths := Seq.empty,
-    requireMainConfigCDNPaths := Seq.empty,
     requireMainConfigBundles := Nil,
     requireMainConfigShim := Nil,
     requireMainConfigMap := Nil,
@@ -657,19 +685,16 @@ object SbtRequire
     requireMainConfig := JS.Object(
       "baseUrl" -> requireMainConfigBaseUrl.value,
       "paths" -> {
-        val paths = requireMainConfigPaths.value ++
-          (if (requireMinified.value) requireMainConfigMinifiedPaths.value else Seq.empty) ++
-          (if (requireCDN.value) requireMainConfigCDNPaths.value else Seq.empty)
         JS.Object(
-          paths.map {
+          requireMainConfigPaths.value.map {
             case (id, path) =>
-              id -> JS(path)
+              id -> JS(path.get(requireMinified.value, requireCDN.value))
           }: _*
         )
       },
       "bundles" -> JS.Object(requireMainConfigBundles.value.map {
         case (id, bundle) =>
-          id -> JS(bundle)
+          id -> JS(bundle.map(b => b.get(requireMinified.value, requireCDN.value)))
       }: _*),
       "shim" -> JS.Object(requireMainConfigShim.value.map {
         case (id, RequireShimConfig(deps, exports, init)) =>
@@ -703,11 +728,12 @@ object SbtRequire
       "skipDataMain" -> requireMainConfigSkipDataMain.value
     ),
     requireMainModule := "main",
-    requireMainPath := RequirePath.minify(
-      requireMainConfigBaseUrl.value.getOrElse("") + "/" + requireMainModule.value,
-      requireMinified.value
-    ),
-    requireMainFile := requireMainDirectory.value / RequirePath.filename(RequirePath.relativize(requireMainPath.value)),
+    requireMainPath := {
+      RequirePath(
+        requireMainConfigBaseUrl.value.getOrElse("") + "/" + requireMainModule.value
+      ).minify()
+    },
+    requireMainFile := requireMainDirectory.value / RequirePath.file(RequirePath.relative(requireMainPath.value.get(requireMinified.value, requireCDN.value))),
     requireMainTemplateFile := None,
     requireMainGenerator := {
       implicit val logger = streams.value.log
@@ -739,9 +765,9 @@ object SbtRequire
     sourceGenerators <+= requireMainGenerator,
     webIndexScripts ++= Seq[Script](
       SbtWebIndex.autoImport.Script(
-        requirePath.value,
+        RequirePath.file(requirePath.value.get(requireMinified.value, requireCDN.value)),
         async = true,
-        attributes = Map("data-main" -> RequirePath.filename(requireMainPath.value))
+        attributes = Map("data-main" -> RequirePath.file(requireMainPath.value.get(requireMinified.value, requireCDN.value)))
       )
     ),
 
@@ -756,13 +782,15 @@ object SbtRequire
     requireBuildConfigAppDir := requireBuildDirectory.value / "stage",
     requireBuildConfigBaseUrl <<= requireMainConfigBaseUrl,
     requireBuildConfigMainConfigFiles := Seq(
-      requireBuildConfigAppDir.value / RequirePath.filename(requireMainPath.value)
+      requireBuildConfigAppDir.value / RequirePath.file(requireMainPath.value.get(requireMinified.value, requireCDN.value))
     ),
     requireBuildConfigPaths := requireMainConfigPaths.value map {
+      case (id, path) => (id, path.get(requireMinified.value, requireCDN.value))
+    } map {
       case (id, path) if path.indexOf("//") >= 0 => // do not optimize external path such as CDN urls
         (id, "empty:")
       case (id, path) if path.startsWith("/") => // rebase absolute path to app dir
-        (id, (requireBuildConfigAppDir.value / RequirePath.relativize(path)).getAbsolutePath)
+        (id, (requireBuildConfigAppDir.value / RequirePath.relative(path)).getAbsolutePath)
       case (id, path) =>
         (id, path)
     },
@@ -787,7 +815,11 @@ object SbtRequire
     requireBuildConfigOptimizeAllPluginResources := false,
     requireBuildConfigFindNestedDependencies := false,
     requireBuildConfigRemoveCombined := true,
-    requireBuildConfigModules := Seq.empty,
+    requireBuildConfigModules := Seq(
+      JS.Object(
+        "name" -> requireMainModule.value
+      )
+    ),
     requireBuildConfigPreserveLicenseComments := false,
     requireBuildConfigLogLevel := RequireLogLevel.Trace,
     requireBuildConfigOnBuildRead := None,
@@ -805,7 +837,7 @@ object SbtRequire
       "appDir" -> requireBuildConfigAppDir.value.getAbsolutePath,
       "baseUrl" -> requireBuildConfigBaseUrl.value.map {
         case baseUrl if baseUrl.startsWith("/") =>
-          (requireBuildConfigAppDir.value / RequirePath.relativize(baseUrl)).getAbsolutePath
+          (requireBuildConfigAppDir.value / RequirePath.relative(baseUrl)).getAbsolutePath
         case baseUrl =>
           baseUrl
       },

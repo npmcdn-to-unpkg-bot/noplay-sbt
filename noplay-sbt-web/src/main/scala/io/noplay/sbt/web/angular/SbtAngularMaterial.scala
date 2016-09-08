@@ -34,7 +34,7 @@ object SbtAngularMaterial
 
   val unscopedProjectSettings = Seq(
     requireMainConfigPaths ++= Seq(
-      "angular-material" -> s"/${webModulesLib.value}/angular-material/angular-material"
+      "angular-material" -> RequirePath(s"/${webModulesLib.value}/angular-material/angular-material")
     ),
     requireMainConfigShim +=
       "angular-material" -> RequireShimConfig(

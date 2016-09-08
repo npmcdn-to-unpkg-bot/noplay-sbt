@@ -65,7 +65,7 @@ object SbtLoggly
     }.dependsOn(WebKeys.nodeModules).taskValue,
     webModuleDirectories <+= logglyWebModulesDirectory,
     webModuleGenerators <+= logglyWebModulesGenerator,
-    requireMainConfigPaths += "loggly" -> s"/${webModulesLib.value}/${logglyLibraryName.value}/${logglyLibraryFileName.value}",
+    requireMainConfigPaths += "loggly" -> RequirePath(s"/${webModulesLib.value}/${logglyLibraryName.value}/${logglyLibraryFileName.value}"),
     requireMainConfigShim ++= Seq(
       "loggly" -> RequireShimConfig(
         Seq("module"),

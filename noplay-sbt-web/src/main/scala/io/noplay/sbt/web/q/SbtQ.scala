@@ -38,9 +38,10 @@ object SbtQ
   ) ++ inConfig(Assets)(unscopedProjectSettings) ++ inConfig(TestAssets)(unscopedProjectSettings)
 
   private lazy val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "q" -> s"/${webModulesLib.value}/q/q",
-    //requireMainConfigMinifiedPaths += "q" -> s"/${webModulesLib.value}/q/q",
-    requireMainConfigCDNPaths += "q" -> s"//cdnjs.cloudflare.com/ajax/libs/q.js/${qVersion.value}/q.min",
+    requireMainConfigPaths += "q" -> RequirePath(
+      s"/${webModulesLib.value}/q/q",
+      unminifiedCDN = Some(s"//cdnjs.cloudflare.com/ajax/libs/q.js/${qVersion.value}/q")
+    ).minify(".min"),
     requireMainConfigShim += "q" -> RequireShimConfig(exports = Some("Q"))
   )
 }

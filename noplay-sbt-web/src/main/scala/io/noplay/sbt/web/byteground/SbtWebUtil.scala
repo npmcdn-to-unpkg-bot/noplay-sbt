@@ -48,13 +48,13 @@ object SbtWebUtil
       webUtilPath(name, Some(path))
 
     private def webUtilPath(name: String, path: Option[String]): Def.Setting[_] =
-      requireMainConfigPaths += name -> s"/${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}"
+      requireMainConfigPaths += name -> RequirePath(s"/${webModulesLib.value}/${webUtilName.value}/${path.getOrElse(name)}")
   }
 
   import autoImport._
 
   val unscopedProjectSettings = Seq(
-    requireMainConfigPaths += "bootstrap" -> s"${webModulesLib.value}/bootstrap"
+    requireMainConfigPaths += "bootstrap" -> RequirePath(s"${webModulesLib.value}/bootstrap")
   ) ++ Seq(
     webUtilPath("angular-analytics"),
     webUtilPath("angular-auth", "angular-auth/auth"),
