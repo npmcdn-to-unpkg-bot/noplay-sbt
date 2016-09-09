@@ -15,16 +15,12 @@
  */
 package io.noplay.sbt.web
 
-import com.typesafe.sbt.web.SbtWeb
-import io.alphard.sbt.{SbtWebBrowser, SbtWebServer}
-import io.noplay.sbt.web.require.SbtRequire
-import sbt.AutoPlugin
+import io.alphard.sbt.SbtWebService
+import sbt._
 
-object SbtWebSettings
+object SbtWebServiceSettings
   extends AutoPlugin {
   override final val requires =
-    SbtWeb &&
-      SbtWebIndex &&
-      SbtWebServer &&
-      SbtWebBrowser
+    SbtWebService &&
+      SbtWebSettings
 }
