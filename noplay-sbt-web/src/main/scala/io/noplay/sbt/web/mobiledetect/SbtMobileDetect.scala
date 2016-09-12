@@ -41,7 +41,7 @@ object SbtMobileDetect
   private lazy val unscopedSettings = Seq(
     requireMainConfigPaths += "mobile-detect" -> RequirePath(
       s"/${webModulesLib.value}/mobile-detect/mobile-detect",
-      unminifiedCDN = Some(s"//npmcdn.com/mobile-detect@${mobileDetectVersion.value}/mobile-detect")
+      unminifiedCDN = Some(s"//unpkg.com/mobile-detect@${mobileDetectVersion.value}/mobile-detect")
     ).minify()
   )
 

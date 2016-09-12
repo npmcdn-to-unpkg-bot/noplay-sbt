@@ -41,7 +41,7 @@ object SbtBabelPolyfill
   private lazy val unscopedSettings = Seq(
     requireMainConfigPaths += "babel-polyfill" -> RequirePath(
       s"/${webModulesLib.value}/babel-polyfill/dist/polyfill",
-      unminifiedCDN = Some(s"//npmcdn.com/babel-polyfill@${babelPolyfillVersion.value}/dist/polyfill")
+      unminifiedCDN = Some(s"//unpkg.com/babel-polyfill@${babelPolyfillVersion.value}/dist/polyfill")
     ).minify(".min")
   )
 
